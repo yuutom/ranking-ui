@@ -9,7 +9,7 @@ import type { KishiRecord } from "./kishiRecord";
 import type { ResultFromKishi } from "./resultFromKishi";
 
 export interface Player {
-    id: number;
+    id: string;
     kishiNumber: number;
     nameKana: string;
     nameRome: string;

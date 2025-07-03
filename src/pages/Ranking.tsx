@@ -27,8 +27,10 @@ import { Affiliation } from '../enum/Affiliation';
 import type { Player } from '../types/player';
 import { DateUtils } from '../utils/DateUtils';
 import { jsonPlayers } from '../data/playersJson';
+import { latestRatings } from '../data/ragingHistory';
 
 const sortOptions = [
+  { name: "Rate" },
   { name: "勝率"},
   { name: "勝数"},
   { name: "対局数"},
@@ -73,12 +75,23 @@ const filters = [
   },
 ]
 
+const playersWithRating = jsonPlayers.map((player) => {
+  const rating = latestRatings.get(player.id);
+
+  return {
+    ...player,
+    rating: rating ? rating.rating : 0,
+    delta: rating?.delta,
+    ratingDate: rating?.date,
+  };
+});
+
 export default function Ranking() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: Set<string> }>({});
-  const [sortKey, setSortKey] = useState<string>("勝率");
-  const filteredData = jsonPlayers
+  const [sortKey, setSortKey] = useState<string>("Rate");
+  const filteredData = playersWithRating
   .filter((kishi) => {
     return Object.entries(selectedFilters).every(([key, set]) => {
       if (set.size === 0) return true;
@@ -101,6 +114,8 @@ export default function Ranking() {
       return (b.record?.wins || 0) - (a.record?.wins || 0);
     } else if (sortKey === '対局数') {
       return getTotalGames(b) - getTotalGames(a);
+    } else if (sortKey === 'Rate') {
+    return (b.rating || 0) - (a.rating || 0);
     }
     return 0;
 });
@@ -349,19 +364,19 @@ export default function Ranking() {
                     棋風
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    順位戦
+                    順
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    竜王戦
+                    竜
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    勝数
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    敗数
+                    勝敗
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                     勝率
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    Rate
                   </th>
                 </tr>
               </thead>
@@ -390,8 +405,7 @@ export default function Ranking() {
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.playingStyle}</td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.junisenClass}</td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.ryuohsenClass}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.record?.wins}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.record?.loses}</td>
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.record?.wins}-{kishi.record?.loses}</td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                         {kishi.record && (kishi.record.wins + kishi.record.loses > 0) ? (
                         <>
@@ -400,6 +414,7 @@ export default function Ranking() {
                         ) : (
                         "-"
                         )}</td>
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.rating}</td>
                   </tr>
                 ))}
               </tbody>
