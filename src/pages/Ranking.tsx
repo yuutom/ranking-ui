@@ -27,7 +27,7 @@ import { Affiliation } from '../enum/Affiliation';
 import type { Player } from '../types/player';
 import { DateUtils } from '../utils/DateUtils';
 import { jsonPlayers } from '../data/playersJson';
-import { latestRatings } from '../data/ragingHistory';
+import { latestRatings } from '../data/ratingHistoryJson';
 
 const sortOptions = [
   { name: "Rate" },
@@ -409,12 +409,12 @@ export default function Ranking() {
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
                         {kishi.record && (kishi.record.wins + kishi.record.loses > 0) ? (
                         <>
-                        {((kishi.record.wins / (kishi.record.wins + kishi.record.loses))).toFixed(3)}
+                        {((kishi.record.wins / (kishi.record.wins + kishi.record.loses))).toFixed(2)}
                         </>
                         ) : (
                         "-"
                         )}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.rating}</td>
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.rating.toFixed(1)}</td>
                   </tr>
                 ))}
               </tbody>

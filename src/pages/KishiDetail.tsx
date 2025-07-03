@@ -37,7 +37,7 @@ export default function Example() {
                   <img
                     alt=""
                     src={player?.imageUrl}
-                    className="h-40 w-auto rounded-full"
+                    className="size-40 object-cover rounded-full"
                   />
                   <span aria-hidden="true" className="absolute inset-0 rounded-full shadow-inner" />
                 </div>
@@ -57,24 +57,10 @@ export default function Example() {
                 <div className="mt-1 text-gray-500">{player.nameRome}</div>
               </div>
             </div>
-            <div className="mt-6 flex flex-col-reverse justify-stretch space-y-4 space-y-reverse sm:flex-row-reverse sm:justify-end sm:space-x-3 sm:space-y-0 sm:space-x-reverse md:mt-0 md:flex-row md:space-x-3">
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                Disqualify
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-              >
-                Advance to offer
-              </button>
-            </div>
           </div>
 
-          <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-6 sm:px-6 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-3">
-            <div className="space-y-6 lg:col-span-2 lg:col-start-1">
+          <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-6 sm:px-6 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-2">
+            <div className="space-y-6 lg:col-span-1 lg:col-start-1">
               {/* Description list*/}
               <section aria-labelledby="applicant-information-title">
                 <div className="bg-white shadow sm:rounded-lg">
@@ -128,9 +114,7 @@ export default function Example() {
                       <div className="sm:col-span-2">
                         <dt className="text-sm font-medium text-gray-500">紹介</dt>
                         <dd className="mt-1 text-sm text-gray-900">
-                          Fugiat ipsum ipsum deserunt culpa aute sint do nostrud anim incididunt cillum culpa consequat.
-                          Excepteur qui ipsum aliquip consequat sint. Sit id mollit nulla mollit nostrud in ea officia
-                          proident. Irure nostrud pariatur mollit ad adipisicing reprehenderit deserunt qui eu.
+                          -
                         </dd>
                       </div>
                     </dl>
@@ -217,7 +201,7 @@ export default function Example() {
             </div>
 
             {/* 対局結果タイムライン */}
-            <section aria-labelledby="timeline-title" className="lg:col-span-1 lg:col-start-3">
+            <section aria-labelledby="timeline-title" className="lg:col-span-1 lg:col-start-2">
               <div className="bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
                 <h2 id="timeline-title" className="text-lg font-medium text-gray-900">
                   対局結果
