@@ -4,7 +4,7 @@ import type { RatingRecord } from '../types/RatingRecord'
 import rawRatingHistory from './rating_history.json'
 
 
-const jsonRatingHistory: RatingRecord[] = rawRatingHistory.map(convertEnums);
+export const jsonRatingHistory: RatingRecord[] = rawRatingHistory.map(convertEnums);
 
 export function convertEnums(raw: any): RatingRecord {
   const playerCategoryList = Object.values(PlayerCategory)
@@ -46,3 +46,69 @@ export const latestGameResults = (() => {
   const currentYear = new Date().getFullYear();
   return jsonRatingHistory.filter((record) => record.year === currentYear);
 })();
+
+export const statsMap = new Map<
+  string,
+  {
+    wins: number;
+    total: number;
+    winRate: number;
+    maxStreak: number;
+  }
+>();
+
+for (const result of latestGameResults.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())) {
+  const playerId = result.player_id;
+  if (!statsMap.has(playerId)) {
+    statsMap.set(playerId, { wins: 0, total: 0, winRate: 0, maxStreak: 0 });
+  }
+
+  const stats = statsMap.get(playerId)!;
+  stats.total += 1;
+
+  const isWin =
+    result.result_status === ResultStatus.WIN ||
+    result.result_status === ResultStatus.BYE_WIN;
+
+  if (isWin) {
+    stats.wins += 1;
+  }
+}
+
+// 2. 勝率、連勝記録を計算
+for (const [playerId, stats] of statsMap.entries()) {
+  stats.winRate = stats.total > 0 ? stats.wins / stats.total : 0;
+
+  const games = latestGameResults
+    .filter((r) => r.player_id === playerId)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  let currentStreak = 0;
+  let maxStreak = 0;
+
+  for (const g of games) {
+    const isWin =
+      g.result_status === ResultStatus.WIN ||
+      g.result_status === ResultStatus.BYE_WIN;
+    if (isWin) {
+      currentStreak += 1;
+      maxStreak = Math.max(maxStreak, currentStreak);
+    } else {
+      currentStreak = 0;
+    }
+  }
+
+  stats.maxStreak = maxStreak;
+}
+
+// 3. 各種ソートでランキングを決定
+const entries = Array.from(statsMap.entries());
+
+export const sortedByWinRate = [...entries].sort((a, b) => b[1].winRate - a[1].winRate);
+export const sortedByWins = [...entries].sort((a, b) => b[1].wins - a[1].wins);
+export const sortedByTotal = [...entries].sort((a, b) => b[1].total - a[1].total);
+export const sortedByStreak = [...entries].sort((a, b) => b[1].maxStreak - a[1].maxStreak);
+
+// 4. プレイヤーのランキング情報を取得
+export const getRanking = (list: typeof entries, playerId: string) =>
+  list.findIndex(([id]) => id === playerId) + 1;

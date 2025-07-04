@@ -3,7 +3,8 @@ import type { Player } from '../types/player'
 import { DateUtils } from '../utils/DateUtils'
 import { ResultStatusIcon } from '../componets/ResultStatusIcon'
 import { jsonPlayers } from '../data/playersJson'
-import { latestGameResults, latestRatings } from '../data/ratingHistoryJson'
+import { getRanking, jsonRatingHistory, latestGameResults, latestRatings, sortedByStreak, sortedByTotal, sortedByWinRate, sortedByWins, statsMap } from '../data/ratingHistoryJson'
+import { extractDisplayGameName } from '../enum/GameCategory'
 
 export default function Example() {
   const { kishiNumber } = useParams<{ kishiNumber: string }>()
@@ -25,6 +26,12 @@ export default function Example() {
   const playerRanking = sortedRatings.indexOf(player.id) + 1;
   const playerRating = latestRatings.get(player.id)?.rating;
 
+  const myStats = statsMap.get(player.id);
+  const winRateRanking = getRanking(sortedByWinRate, player.id);
+  const winsRanking = getRanking(sortedByWins, player.id);
+  const totalRanking = getRanking(sortedByTotal, player.id);
+  const streakRanking = getRanking(sortedByStreak, player.id);
+
   return (
     <>
       {/*
@@ -36,7 +43,7 @@ export default function Example() {
         ```
       */}
       <div className="min-h-full">
-        <main className="py-10">
+        <main className="">
           {/* Page header */}
           <div className="mx-auto grid max-w-3xl grid-cols-1 gap-6 sm:px-6 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-3 lg:items-stretch">
             <div className="space-y-6 lg:col-span-2 lg:col-start-1">
@@ -144,13 +151,7 @@ export default function Example() {
                       </div>
                       <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500">竜王戦</dt>
-                        <dd className="mt-1 text-sm text-gray-900">{player?.ryuohsen}</dd>
-                      </div>
-                      <div className="sm:col-span-2">
-                        <dt className="text-sm font-medium text-gray-500">紹介</dt>
-                        <dd className="mt-1 text-sm text-gray-900">
-                          -
-                        </dd>
+                        <dd className="mt-1 text-sm text-gray-900 mb-4">{player?.ryuohsen}</dd>
                       </div>
                     </dl>
                   </div>
@@ -176,7 +177,9 @@ export default function Example() {
                                   <div className="absolute bottom-0 right-full h-px w-screen bg-gray-100" />
                                   <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
                                 </td>
-                                <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">{player.record?.wins}勝{player.record?.loses}敗</td>
+                                <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                                  {myStats ? `${(myStats.wins)}勝${myStats.total - myStats.wins}敗` : "-"}
+                                </td>
                               </tr>
                               <tr>
                                 <td className="relative py-4 pr-3 text-sm font-medium text-gray-900">
@@ -185,14 +188,8 @@ export default function Example() {
                                   <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
                                 </td>
                                 <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                                {player.record && (player.record.wins + player.record.loses > 0) ? (
-                                  <>
-                                  {((player.record.wins / (player.record.wins + player.record.loses))).toFixed(4)} ({player.record?.winning_rate_ranking}位)
-                                  </>
-                                ) : (
-                                  "-"
-                                )}
-                              </td>
+                                  {myStats ? `${(myStats.winRate * 100).toFixed(0)}% (${winRateRanking}位)` : "-"}
+                                </td>
                               </tr>
                               <tr>
                                 <td className="relative py-4 pr-3 text-sm font-medium text-gray-900">
@@ -201,14 +198,8 @@ export default function Example() {
                                   <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
                                 </td>
                                 <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                                {player.record && (player.record.wins + player.record.loses > 0) ? (
-                                  <>
-                                  {(player.record.wins + player.record.loses)}局 ({player.record?.total_ranking}位)
-                                  </>
-                                ) : (
-                                  "-"
-                                )}
-                              </td>
+                                  {myStats ? `${myStats.total}局 (${totalRanking}位)` : "-"}
+                                </td>
                               </tr>
                               <tr>
                                 <td className="relative py-4 pr-3 text-sm font-medium text-gray-900">
@@ -217,14 +208,18 @@ export default function Example() {
                                   <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
                                 </td>
                                 <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
-                                {player.record && (player.record.wins > 0) ? (
-                                  <>
-                                  {player.record.wins}勝 ({player.record?.wins_ranking}位)
-                                  </>
-                                ) : (
-                                  "-"
-                                )}
-                              </td>
+                                  {myStats ? `${myStats.wins}勝 (${winsRanking}位)` : "-"}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td className="relative py-4 pr-3 text-sm font-medium text-gray-900">
+                                  連勝ランキング
+                                  <div className="absolute bottom-0 right-full h-px w-screen bg-gray-100" />
+                                  <div className="absolute bottom-0 left-0 h-px w-screen bg-gray-100" />
+                                </td>
+                                <td className="hidden px-3 py-4 text-sm text-gray-500 sm:table-cell">
+                                  {myStats ? `${myStats.maxStreak}連勝 (${streakRanking}位)` : "-"}
+                                </td>
                               </tr>
                           </tbody>
                         </table>
@@ -239,33 +234,47 @@ export default function Example() {
             <section aria-labelledby="timeline-title" className="lg:col-span-1 lg:col-start-2">
               <div className="bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
                 <h2 id="timeline-title" className="text-lg font-medium text-gray-900">
-                  対局結果
+                  直近10局の対局結果
                 </h2>
                 {/* Activity Feed */}
                 <div className="mt-6 flow-root">
-                <ul role="list" className="-mb-8">
-                {latestGameResults.filter((result) => result.player_id === player.id )
-                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                .slice(0, 10)
-                .map((result) => (
-                  <li key={result.game_id}>
-                    <div className="relative pb-8">
-                      <div className="relative flex items-center space-x-3">
-                        <div>{ResultStatusIcon(result.result_status)}</div>
-                        <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{result.game_name}</p>
-                            <p className="ml-4 text-xs text-gray-500">vs. {result.opponent_name}</p>
+                  <ul role="list" className="space-y-8">
+                    {jsonRatingHistory
+                      .filter((result) => result.player_id === player.id)
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .slice(0, 10)
+                      .map((result) => (
+                        <li key={result.game_id} className="flex items-center gap-3 text-sm text-gray-700 pb-2">
+                          {/* 結果アイコン */}
+                          <div className="flex items-center justify-center w-6 h-6">{ResultStatusIcon(result.result_status)}</div>
+
+                          {/* 対局名 + 相手 */}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900">
+                              {extractDisplayGameName(result.game_name)}
+                            </div>
+                            <div className="text-xs text-gray-500 flex flex-wrap gap-1">
+                              <span>vs.</span>
+                              <a href={`/players/${result.opponent_number}`} className="underline">
+                                {result.opponent_name}
+                              </a>
+                              <span>({result.opponent_rating.toFixed(0)})</span>
+                            </div>
                           </div>
-                          <div className="whitespace-nowrap text-right text-sm text-gray-500">
+
+                          {/* 自分のレーティング + Δ */}
+                          <div className="w-20 text-right">
+                            <div className="font-semibold text-gray-800">{result.rating.toFixed(0)}</div>
+                            <div className="text-xs text-gray-500">({result.delta.toFixed(1)})</div>
+                          </div>
+
+                          {/* 日付 */}
+                          <div className="w-24 text-right text-xs text-gray-500">
                             {DateUtils.formatShortDate(result.date)}
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-                </ul>
+                        </li>
+                      ))}
+                  </ul>
                 </div>
               </div>
             </section>
