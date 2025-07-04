@@ -6,5 +6,5 @@ export enum RyuohsenClass {
     CLASS_4 = "4組",
     CLASS_5 = "5組",
     CLASS_6 = "6組",
-    NONE = "なし"
+    NONE = "-"
   }

@@ -7,8 +7,6 @@ import 'preline'
 import Layout from './componets/Layout';
 import KishiDetail from './pages/KishiDetail';
 import Ranking from './pages/Ranking';
-import ArticleDetail from './pages/ArticleDetail';
-import ArticleList from './pages/ArticleList';
 import Books from './pages/Books';
 
 async function loadPreline() {
@@ -41,8 +39,6 @@ export default function Example() {
           <Route path="players/:kishiNumber" element={<KishiDetail />} />
           <Route path="ranking" element={<Ranking />} />
           <Route path="books" element={<Books />} />
-          <Route path="articles" element={<ArticleList />} />
-          <Route path="articles/:id" element={<ArticleDetail />}/>
         </Route>
       </Routes>
   )
