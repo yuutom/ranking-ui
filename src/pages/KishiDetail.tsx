@@ -3,6 +3,7 @@ import type { Player } from '../types/player'
 import { DateUtils } from '../utils/DateUtils'
 import { ResultStatusIcon } from '../componets/ResultStatusIcon'
 import { jsonPlayers } from '../data/playersJson'
+import { latestGameResults, latestRatings } from '../data/ratingHistoryJson'
 
 export default function Example() {
   const { kishiNumber } = useParams<{ kishiNumber: string }>()
@@ -14,8 +15,15 @@ export default function Example() {
   }
   const displayTitle: string[] =
   Array.isArray(player?.title) && player.title.length > 0
-    ? player.title
+    ? [player.title[0]]
     : [player?.danni ?? ''];
+
+    const sortedRatings = Array.from(latestRatings.entries())
+    .sort((a, b) => b[1].rating - a[1].rating)
+    .map(([id]) => id); // id順に並んだ配列
+  
+  const playerRanking = sortedRatings.indexOf(player.id) + 1;
+  const playerRating = latestRatings.get(player.id)?.rating;
 
   return (
     <>
@@ -30,31 +38,58 @@ export default function Example() {
       <div className="min-h-full">
         <main className="py-10">
           {/* Page header */}
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:max-w-7xl lg:px-8">
-            <div className="flex items-center space-x-5">
-              <div className="shrink-0">
-                <div className="relative">
-                  <img
-                    alt=""
-                    src={player?.imageUrl}
-                    className="size-40 object-cover rounded-full"
-                  />
-                  <span aria-hidden="true" className="absolute inset-0 rounded-full shadow-inner" />
-                </div>
-              </div>
-              <div className="ml-4">
-                <div className="flex items-center space-x-2">
-                  <h1 className="text-3xl font-bold text-gray-900">{player?.nameKana}</h1>
-                  <h1 className="text-2xl font-bold text-gray-500">({DateUtils.getCurrentAge(player.birthDate)})</h1>
-                  <div className="ml-2 space-x-2">
-                  {displayTitle.map((title) => (
-                  <span className="inline-flex shrink-0 rounded-full bg-green-50 px-4.5 py-1.5 font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                      {title}
-                  </span>
-                  ))}
+          <div className="mx-auto grid max-w-3xl grid-cols-1 gap-6 sm:px-6 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-3 lg:items-stretch">
+            <div className="space-y-6 lg:col-span-2 lg:col-start-1">
+              <div className="bg-white shadow sm:rounded-lg">
+                <div className="px-4 py-5 sm:px-6">
+                  <div className="flex items-center space-x-5">
+                    <div className="shrink-0">
+                      <div className="relative">
+                        <img
+                          alt=""
+                          src={player?.imageUrl}
+                          className="size-50 object-cover rounded-full"
+                        />
+                        <span aria-hidden="true" className="absolute inset-0 rounded-full shadow-inner" />
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <div className="flex items-center space-x-2">
+                        <h1 className="text-4xl font-bold text-gray-900">{player?.nameKana}</h1>
+                        <h1 className="text-2xl font-bold text-gray-500">({DateUtils.getCurrentAge(player.birthDate)})</h1>
+                        <div className="ml-2 space-x-2">
+                        {displayTitle.map((title) => (
+                        <span className="inline-flex shrink-0 rounded-full bg-green-50 px-4.5 py-1.5 font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                            {title}
+                        </span>
+                        ))}
+                        </div>
+                      </div>
+                      <div className="mt-1 text-gray-500">{player.nameRome}</div>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-1 text-gray-500">{player.nameRome}</div>
+              </div>
+            </div>
+            <div className="flex flex-col space-y-6 lg:col-span-1 lg:col-start-3 h-full">
+              {/* レーティング */}
+              <div className="bg-white shadow sm:rounded-lg flex-1 relative">
+                <h2 className="absolute top-3 left-4 text-sm font-bold text-gray-900">レーティング</h2>
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-3xl text-gray-500">
+                    {playerRating?.toFixed(1) ?? "未評価"}
+                  </div>
+                </div>
+              </div>
+
+              {/* 順位 */}
+              <div className="bg-white shadow sm:rounded-lg flex-1 relative">
+                <h2 className="absolute top-3 left-4 text-sm font-bold text-gray-900">順位</h2>
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-3xl text-gray-500">
+                    {playerRating ? `${playerRanking} 位` : "—"}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -209,15 +244,18 @@ export default function Example() {
                 {/* Activity Feed */}
                 <div className="mt-6 flow-root">
                 <ul role="list" className="-mb-8">
-                {player.resultsFromKishi?.map((result) => (
-                  <li key={result.gameName}>
+                {latestGameResults.filter((result) => result.player_id === player.id )
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .slice(0, 10)
+                .map((result) => (
+                  <li key={result.game_id}>
                     <div className="relative pb-8">
                       <div className="relative flex items-center space-x-3">
-                        <div>{ResultStatusIcon(result.resultStatus)}</div>
+                        <div>{ResultStatusIcon(result.result_status)}</div>
                         <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{result.gameName}</p>
-                            <p className="ml-4 text-xs text-gray-500">vs. {result.oponentName}</p>
+                            <p className="text-sm font-medium text-gray-900">{result.game_name}</p>
+                            <p className="ml-4 text-xs text-gray-500">vs. {result.opponent_name}</p>
                           </div>
                           <div className="whitespace-nowrap text-right text-sm text-gray-500">
                             {DateUtils.formatShortDate(result.date)}
