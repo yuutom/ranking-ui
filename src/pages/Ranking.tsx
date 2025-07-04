@@ -27,15 +27,15 @@ import { Affiliation } from '../enum/Affiliation';
 import type { Player } from '../types/player';
 import { DateUtils } from '../utils/DateUtils';
 import { jsonPlayers } from '../data/playersJson';
-import { latestRatings } from '../data/ratingHistoryJson';
+import { latestRatings, statsMap } from '../data/ratingHistoryJson';
 
 const sortOptions = [
   { name: "Rate" },
   { name: "勝率"},
   { name: "勝数"},
   { name: "対局数"},
-  { name: "年齢"},
-  { name: "デビュー年齢"},
+  { name: "年齢 (昇順)"},
+  { name: "デビュー年齢 (昇順)"},
 ]
 const filters = [
   {
@@ -77,12 +77,16 @@ const filters = [
 
 const playersWithRating = jsonPlayers.map((player) => {
   const rating = latestRatings.get(player.id);
+  const stats = statsMap.get(player.id);
 
   return {
     ...player,
-    rating: rating ? rating.rating : 0,
-    delta: rating?.delta,
-    ratingDate: rating?.date,
+    rating: rating?.rating ?? 0,
+    stats: stats,
+    wins: stats?.wins ?? -1,
+    total: stats?.total ?? -1,
+    winRate: stats?.winRate ?? -1,
+    maxStreak: stats?.maxStreak ?? -1,
   };
 });
 
@@ -101,19 +105,16 @@ export default function Ranking() {
   })
   .sort((a, b) => {
     const getWinRate = (k: typeof a) =>
-      k.record && k.record.wins + k.record.loses > 0
-        ? k.record.wins / (k.record.wins + k.record.loses)
+      k.stats && k.stats.total > 0
+        ? k.stats.wins / k.stats.total
         : 0;
-
-    const getTotalGames = (k: typeof a) =>
-      (k.record?.wins || 0) + (k.record?.loses || 0);
 
     if (sortKey === '勝率') {
       return getWinRate(b) - getWinRate(a);
     } else if (sortKey === '勝数') {
-      return (b.record?.wins || 0) - (a.record?.wins || 0);
+      return (b.wins || 0) - (a.wins || 0);
     } else if (sortKey === '対局数') {
-      return getTotalGames(b) - getTotalGames(a);
+      return (b.total || 0) - (a.total || 0);
     } else if (sortKey === 'Rate') {
     return (b.rating || 0) - (a.rating || 0);
     }
@@ -361,9 +362,6 @@ export default function Ranking() {
                     所属
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    棋風
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                     順
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -374,6 +372,9 @@ export default function Ranking() {
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                     勝率
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    連勝
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                     Rate
@@ -402,18 +403,18 @@ export default function Ranking() {
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.danni}</td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.affiliation}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.playingStyle}</td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.junisenClass}</td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.ryuohsenClass}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.record?.wins}-{kishi.record?.loses}</td>
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.wins}-${kishi.stats.total - kishi.stats.wins}` : "-"}</td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                        {kishi.record && (kishi.record.wins + kishi.record.loses > 0) ? (
+                        {kishi.stats && (kishi.stats.total > 0) ? (
                         <>
-                        {((kishi.record.wins / (kishi.record.wins + kishi.record.loses))).toFixed(2)}
+                        {((kishi.stats.wins / (kishi.stats.total))).toFixed(2)}
                         </>
                         ) : (
                         "-"
                         )}</td>
+                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.maxStreak}` : "-"}</td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.rating.toFixed(1)}</td>
                   </tr>
                 ))}

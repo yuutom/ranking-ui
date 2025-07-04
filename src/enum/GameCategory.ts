@@ -25,6 +25,7 @@ export enum GameCategory {
     JORYU_OUSHOU = "女流王将戦",
     TOUKA = "倉敷藤花戦",
     SHIRATAKI = "新人登竜門戦",
+    OUSHOU = "王将戦",
   }
 
 

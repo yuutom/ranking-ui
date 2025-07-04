@@ -1,15 +1,12 @@
 // players.ts
 import { Affiliation } from '../enum/Affiliation'
 import { Danni } from '../enum/Danni'
-import { GameCategory } from '../enum/GameCategory'
 import { JunisenClass } from '../enum/JunisenClass'
 import { PlayerCategory } from '../enum/PlayerCategory'
 import { PlayingStyle } from '../enum/PlayingStyle'
-import { ResultStatus } from '../enum/ResultStatus'
 import { RyuohsenClass } from '../enum/RyuohsenClass'
 import { Title } from '../enum/Title'
 import type { Player } from '../types/player'
-import type { ResultFromKishi } from '../types/resultFromKishi'
 import rawPlayers from './players.json'
 
 
@@ -44,21 +41,5 @@ export function convertEnums(raw: any): Player {
       playingStyle: styleList[raw.playing_style] ?? PlayingStyle.NONE,
       playerCategory: categoryList[raw.player_category] ?? PlayerCategory.KISHI,
       isActive: raw.is_active,
-      resultsFromKishi: convertResultFromKishi(raw.result_from_kishi ?? []),
-      record: raw.record,
     }
   }
-  
-  export function convertResultFromKishi(rawList: any[]): ResultFromKishi[] {
-    const gameCategoryList = Object.values(GameCategory)
-    const resultStatusList = Object.values(ResultStatus)
-
-    return rawList.map((r): ResultFromKishi => ({
-      gameName: r.game_name,
-      gameCategory: gameCategoryList[r.game_category] ?? GameCategory.OTHER,
-      oponentNumber: r.opponent_number,
-      oponentName: r.opponent_name,
-      resultStatus: resultStatusList[r.result_status] ?? ResultStatus.TBD,
-      date: r.date?.[0] ?? "", // 複数日がある場合は最初の1日目を使う
-    }))
-  }  

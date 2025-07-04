@@ -5,8 +5,6 @@ import type { PlayerCategory } from "../enum/PlayerCategory";
 import type { PlayingStyle } from "../enum/PlayingStyle";
 import type { RyuohsenClass } from "../enum/RyuohsenClass";
 import type { Title } from "../enum/Title";
-import type { KishiRecord } from "./kishiRecord";
-import type { ResultFromKishi } from "./resultFromKishi";
 
 export interface Player {
     id: string;
@@ -26,8 +24,6 @@ export interface Player {
     title: Title[];
     affiliation?: Affiliation;
     playingStyle?: PlayingStyle;
-    resultsFromKishi?: ResultFromKishi[];
-    record?: KishiRecord;
     playerCategory: PlayerCategory;
     isActive: boolean;
 }
