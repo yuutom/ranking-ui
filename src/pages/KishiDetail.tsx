@@ -3,9 +3,10 @@ import type { Player } from '../types/player'
 import { DateUtils } from '../utils/DateUtils'
 import { ResultStatusIcon } from '../componets/ResultStatusIcon'
 import { jsonPlayers } from '../data/playersJson'
-import { getRanking, jsonRatingHistory, latestRatings, sortedByStreak, sortedByTotal, sortedByWinRate, sortedByWins, statsMap } from '../data/ratingHistoryJson'
+import { getFilterdRecord, getRanking, jsonRatingHistory, latestRatings, sortedByStreak, sortedByTotal, sortedByWinRate, sortedByWins, statsMap } from '../data/ratingHistoryJson'
 import { extractDisplayGameName } from '../enum/GameCategory'
 import { Title } from '../enum/Title'
+import { RatingChart } from '../componets/RatingChart'
 
 export default function Example() {
   const { kishiNumber } = useParams<{ kishiNumber: string }>()
@@ -29,9 +30,9 @@ export default function Example() {
       if (hasMeijin) {
         return "名人";
       }
-      return player.title[0]; // その他のタイトルの1つ目を表示
+      return player.title[0];
     }
-    return player?.danni ?? ""; // タイトルがない場合は段位を表示
+    return player?.danni ?? "";
   })();
 
   const sortedRatings = Array.from(latestRatings.entries())
@@ -46,6 +47,12 @@ export default function Example() {
   const winsRanking = getRanking(sortedByWins, player.id);
   const totalRanking = getRanking(sortedByTotal, player.id);
   const streakRanking = getRanking(sortedByStreak, player.id);
+
+  const records = getFilterdRecord(player.id);
+  const maxRecord = records.reduce((max, current) =>
+    current.rating > max.rating ? current : max,
+    records[0]
+);
 
   return (
     <>
@@ -113,7 +120,7 @@ export default function Example() {
           </div>
 
           <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-6 sm:px-6 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-2">
-            <div className="space-y-6 lg:col-span-1 lg:col-start-1">
+            <div className="flex flex-col space-y-6 lg:col-span-1 lg:col-start-1 h-full">
               {/* Description list*/}
               <section aria-labelledby="applicant-information-title">
                 <div className="bg-white shadow sm:rounded-lg">
@@ -242,16 +249,15 @@ export default function Example() {
             </div>
 
             {/* 対局結果タイムライン */}
-            <section aria-labelledby="timeline-title" className="lg:col-span-1 lg:col-start-2">
-              <div className="bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
+            <section aria-labelledby="timeline-title" className="lg:col-span-1 lg:col-start-2 h-full flex flex-col">
+              <div className="bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex-1 flex flex-col">
                 <h2 id="timeline-title" className="text-lg font-medium text-gray-900">
                   直近10局の対局結果
                 </h2>
                 {/* Activity Feed */}
-                <div className="mt-6 flow-root">
+                <div className="mt-6 flow-root flex-1 overflow-y-auto">
                   <ul role="list" className="space-y-8">
-                    {jsonRatingHistory
-                      .filter((result) => result.player_id === player.id)
+                    {records
                       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                       .slice(0, 10)
                       .map((result) => (
@@ -288,6 +294,28 @@ export default function Example() {
                   </ul>
                 </div>
               </div>
+            </section>
+
+            {/* レーティングチャート */}
+            <section className="lg:col-span-2 lg:col-start-1 h-full flex flex-col">
+              <div className="bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex-1 flex flex-col">
+                <div className="flex justify-between items-start">
+                  <h2 id="timeline-title" className="text-lg font-medium text-gray-900">
+                    レーティング推移
+                  </h2>
+                  {maxRecord && (
+                    <div className="text-sm text-right text-gray-600">
+                      <div className="font-medium">最高レート</div>
+                      <div>{maxRecord.rating.toFixed(0)}</div>
+                      <div className="text-xs">{DateUtils.formatJapaneseDate(maxRecord.date)}</div>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-8">
+                <RatingChart ratingHistory={jsonRatingHistory} playerId={player.id} />
+                </div>
+              </div>
+
             </section>
           </div>
         </main>

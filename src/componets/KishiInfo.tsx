@@ -12,15 +12,18 @@ export default function KishiInfo({kishi}: KishiInfoProps) {
       const hasRyuoh = kishi.title.includes(Title.RYUOH);
       const hasMeijin = kishi.title.includes(Title.MEIJIN);
   
-      if (hasMeijin) {
-        return "名人";
+      if (hasRyuoh && hasMeijin) {
+        return "竜王・名人";
       }
       if (hasRyuoh) {
         return "竜王";
       }
-      return kishi.title[0];
+      if (hasMeijin) {
+        return "名人";
+      }
+      return kishi.title[0]; // その他のタイトルの1つ目を表示
     }
-    return kishi?.danni ?? "";
+    return kishi?.danni ?? ""; // タイトルがない場合は段位を表示
   })();
 
     return (

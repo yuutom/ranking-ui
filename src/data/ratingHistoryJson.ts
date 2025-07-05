@@ -3,7 +3,7 @@ import { ResultStatus } from '../enum/ResultStatus';
 import type { RatingRecord } from '../types/RatingRecord'
 import rawRatingHistory from './rating_history.json'
 
-
+// プレイヤーごとの全ての対局結果のリスト
 export const jsonRatingHistory: RatingRecord[] = rawRatingHistory.map(convertEnums);
 
 export function convertEnums(raw: any): RatingRecord {
@@ -30,6 +30,14 @@ export function convertEnums(raw: any): RatingRecord {
     }
   }
 
+// player_idでフィルターした日付（昇順）でソートされた対局リスト
+export function getFilterdRecord(playerId: string): RatingRecord[] {
+  return jsonRatingHistory
+  .filter((r) => r.player_id === playerId)
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+}
+
+// player_id: 最新の対局時のRatingRecord
 export const latestRatings = (() => {
   const map = new Map<string, RatingRecord>();
 
@@ -42,11 +50,13 @@ export const latestRatings = (() => {
   return map;
 })();
 
+// 今年の対局結果
 export const latestGameResults = (() => {
   const currentYear = new Date().getFullYear();
   return jsonRatingHistory.filter((record) => record.year === currentYear);
 })();
 
+// player_id: {勝局数, 対局数, 勝率, 連勝数}のMap
 export const statsMap = new Map<
   string,
   {
