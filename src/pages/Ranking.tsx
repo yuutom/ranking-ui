@@ -355,28 +355,28 @@ export default function Ranking() {
                   <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
                     名前 (年齢 / デビュー年齢)
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
                     段位
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
                     所属
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    順
+                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                    順位戦
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    竜
+                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                    竜王戦
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
                     勝敗
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
                     勝率
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
                     連勝
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
                     Rate
                   </th>
                 </tr>
@@ -401,12 +401,12 @@ export default function Ranking() {
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.danni}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.affiliation}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.junisenClass}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.ryuohsenClass}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.wins}-${kishi.stats.total - kishi.stats.wins}` : "-"}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
+                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.danni}</td>
+                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.affiliation}</td>
+                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.junisenClass}</td>
+                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.ryuohsenClass}</td>
+                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.wins}-${kishi.stats.total - kishi.stats.wins}` : "-"}</td>
+                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">
                         {kishi.stats && (kishi.stats.total > 0) ? (
                         <>
                         {((kishi.stats.wins / (kishi.stats.total))).toFixed(2)}
@@ -414,8 +414,8 @@ export default function Ranking() {
                         ) : (
                         "-"
                         )}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.maxStreak}` : "-"}</td>
-                    <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">{kishi.rating.toFixed(1)}</td>
+                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.maxStreak}` : "-"}</td>
+                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.rating.toFixed(0)}</td>
                   </tr>
                 ))}
               </tbody>

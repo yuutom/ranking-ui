@@ -5,6 +5,7 @@ import { ResultStatusIcon } from '../componets/ResultStatusIcon'
 import { jsonPlayers } from '../data/playersJson'
 import { getRanking, jsonRatingHistory, latestRatings, sortedByStreak, sortedByTotal, sortedByWinRate, sortedByWins, statsMap } from '../data/ratingHistoryJson'
 import { extractDisplayGameName } from '../enum/GameCategory'
+import { Title } from '../enum/Title'
 
 export default function Example() {
   const { kishiNumber } = useParams<{ kishiNumber: string }>()
@@ -14,14 +15,28 @@ export default function Example() {
   if (!player) {
     return <div className="p-8 text-gray-500">棋士が見つかりません</div>
   }
-  const displayTitle: string[] =
-  Array.isArray(player?.title) && player.title.length > 0
-    ? [player.title[0]]
-    : [player?.danni ?? ''];
+  const displayTitle: string = (() => {
+    if (Array.isArray(player?.title) && player.title.length > 0) {
+      const hasRyuoh = player.title.includes(Title.RYUOH);
+      const hasMeijin = player.title.includes(Title.MEIJIN);
+  
+      if (hasRyuoh && hasMeijin) {
+        return "竜王・名人";
+      }
+      if (hasRyuoh) {
+        return "竜王";
+      }
+      if (hasMeijin) {
+        return "名人";
+      }
+      return player.title[0]; // その他のタイトルの1つ目を表示
+    }
+    return player?.danni ?? ""; // タイトルがない場合は段位を表示
+  })();
 
-    const sortedRatings = Array.from(latestRatings.entries())
-    .sort((a, b) => b[1].rating - a[1].rating)
-    .map(([id]) => id); // id順に並んだ配列
+  const sortedRatings = Array.from(latestRatings.entries())
+  .sort((a, b) => b[1].rating - a[1].rating)
+  .map(([id]) => id); // id順に並んだ配列
   
   const playerRanking = sortedRatings.indexOf(player.id) + 1;
   const playerRating = latestRatings.get(player.id)?.rating;
@@ -64,12 +79,8 @@ export default function Example() {
                       <div className="flex items-center space-x-2">
                         <h1 className="text-4xl font-bold text-gray-900">{player?.nameKana}</h1>
                         <h1 className="text-2xl font-bold text-gray-500">({DateUtils.getCurrentAge(player.birthDate)})</h1>
-                        <div className="ml-2 space-x-2">
-                        {displayTitle.map((title) => (
-                        <span className="inline-flex shrink-0 rounded-full bg-green-50 px-4.5 py-1.5 font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                            {title}
-                        </span>
-                        ))}
+                        <div className="ml-2 space-x-2 rounded-full shrink-0 bg-green-50 px-4.5 py-1.5 font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                          {displayTitle}
                         </div>
                       </div>
                       <div className="mt-1 text-gray-500">{player.nameRome}</div>

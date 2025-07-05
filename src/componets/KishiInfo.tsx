@@ -1,11 +1,28 @@
 import { Link } from "react-router-dom";
 import type { Player } from "../types/player";
+import { Title } from "../enum/Title";
 
 interface KishiInfoProps {
     kishi: Player;
 }
 
 export default function KishiInfo({kishi}: KishiInfoProps) {
+  const displayTitle: string = (() => {
+    if (Array.isArray(kishi?.title) && kishi.title.length > 0) {
+      const hasRyuoh = kishi.title.includes(Title.RYUOH);
+      const hasMeijin = kishi.title.includes(Title.MEIJIN);
+  
+      if (hasMeijin) {
+        return "名人";
+      }
+      if (hasRyuoh) {
+        return "竜王";
+      }
+      return kishi.title[0];
+    }
+    return kishi?.danni ?? "";
+  })();
+
     return (
         <Link to={`/players/${kishi.kishiNumber}`}>
         <li key={kishi.kishiNumber} className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow hover:bg-gray-100 transition-colors duration-200">
@@ -14,7 +31,7 @@ export default function KishiInfo({kishi}: KishiInfoProps) {
               <div className="flex items-center space-x-3">
                 <h3 className="truncate text-sm font-medium text-gray-900">{kishi.nameKana}</h3>
                 <span className="inline-flex shrink-0 items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                  {kishi.danni}
+                  {displayTitle}
                 </span>
               </div>
               <p className="mt-1 truncate text-sm text-gray-500">{kishi.nameRome}</p>
