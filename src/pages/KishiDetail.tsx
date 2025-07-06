@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import type { Player } from '../types/player'
 import { DateUtils } from '../utils/DateUtils'
 import { ResultStatusIcon } from '../componets/ResultStatusIcon'
@@ -8,7 +8,12 @@ import { extractDisplayGameName } from '../enum/GameCategory'
 import { Title } from '../enum/Title'
 import { RatingChart } from '../componets/RatingChart'
 
+export function calculateExpectedWinRate(selfRating: number, opponentRating: number): number {
+  return 1 / (1 + Math.pow(10, (opponentRating - selfRating) / 400));
+}
+
 export default function Example() {
+  const navigate = useNavigate();
   const { kishiNumber } = useParams<{ kishiNumber: string }>()
   const player: Player | undefined = jsonPlayers.find(
     (k) => String(k.kishiNumber) === kishiNumber
@@ -16,6 +21,15 @@ export default function Example() {
   if (!player) {
     return <div className="p-8 text-gray-500">棋士が見つかりません</div>
   }
+
+  const playersWithRating = jsonPlayers.map((player) => {
+    const rating = latestRatings.get(player.id);
+    return {
+      ...player,
+      rating: rating?.rating ?? 0,
+    };
+  })
+
   const displayTitle: string = (() => {
     if (Array.isArray(player?.title) && player.title.length > 0) {
       const hasRyuoh = player.title.includes(Title.RYUOH);
@@ -53,6 +67,43 @@ export default function Example() {
     current.rating > max.rating ? current : max,
     records[0]
 );
+
+const sortedRatingsWithWinRate = playersWithRating
+  .sort((a, b) => b.rating - a.rating)
+  .map((r, index) => {
+    if (playerRating === undefined || r.rating === undefined || playerRating == 0 || r.rating == 0) {
+      return {
+        rank: index + 1,
+        name: r.nameKana,
+        id: r.id,
+        number: r.kishiNumber,
+        rating: r.rating,
+        expectedWinRate: "-",
+      };
+    }
+
+    if (player.id === r.id) {
+      return {
+        rank: index + 1,
+        name: r.nameKana,
+        id: r.id,
+        number: r.kishiNumber,
+        rating: r.rating,
+        expectedWinRate: "-",
+      };
+    }
+
+    const winRate = calculateExpectedWinRate(playerRating, r.rating);
+
+    return {
+      rank: index + 1,
+      name: r.nameKana,
+      id: r.id,
+      number: r.kishiNumber,
+      rating: r.rating,
+      expectedWinRate: winRate,
+    };
+  });
 
   return (
     <>
@@ -299,15 +350,15 @@ export default function Example() {
             {/* レーティングチャート */}
             <section className="lg:col-span-2 lg:col-start-1 h-full flex flex-col">
               <div className="bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex-1 flex flex-col">
-                <div className="flex justify-between items-start">
+                <div className="justify-between items-start">
                   <h2 id="timeline-title" className="text-lg font-medium text-gray-900">
                     レーティング推移
                   </h2>
                   {maxRecord && (
                     <div className="text-sm text-right text-gray-600">
-                      <div className="font-medium">最高レート</div>
-                      <div>{maxRecord.rating.toFixed(0)}</div>
-                      <div className="text-xs">{DateUtils.formatJapaneseDate(maxRecord.date)}</div>
+                      <div className="text-md">最高レート</div>
+                      <div className="text-md font-bold text-gray-800">{maxRecord.rating.toFixed(0)}</div>
+                      <div className="text-xs text-gray-500">{DateUtils.formatJapaneseDate(maxRecord.date)}</div>
                     </div>
                   )}
                 </div>
@@ -315,8 +366,47 @@ export default function Example() {
                 <RatingChart ratingHistory={jsonRatingHistory} playerId={player.id} />
                 </div>
               </div>
-
             </section>
+
+              {/* 勝率テーブル */}
+              <section className="lg:col-span-2 lg:col-start-1 h-full flex flex-col">
+                <div className="bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex-1 flex flex-col">
+                  <div className="justify-between items-start">
+                    <h2 id="timeline-title" className="text-lg font-medium text-gray-900">
+                      勝率期待値
+                    </h2>
+                    <table className="mt-8 min-w-full divide-y divide-gray-300">
+                      <thead>
+                      <tr>
+                          <th className="px-3 py-3.5 text-left">順位</th>
+                          <th className="px-3 py-3.5 text-center">名前</th>
+                          <th className="px-3 py-3.5 text-center">レート</th>
+                          <th className="px-3 py-3.5 text-center">勝率</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {sortedRatingsWithWinRate.map((row) => (
+                          <tr                     
+                            key={row.number}
+                            onClick={() => navigate(`/players/${row.number}`)}
+                            className="cursor-pointer hover:bg-gray-100"
+                          >
+                            <td className="px-3 py-3.5 text-left text-gray-500 text-sm">{row.rank}</td>
+                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{row.name}</td>
+                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{row.rating.toFixed(0)}</td>
+                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">
+                              {typeof row.expectedWinRate === "number"
+                                ? `${(row.expectedWinRate * 100).toFixed(1)}%`
+                                : row.expectedWinRate}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+
           </div>
         </main>
       </div>
