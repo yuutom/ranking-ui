@@ -7,7 +7,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 
 const navItems = [
   { name: 'Home', href: '/', current: true },
-  { name: '棋士一覧', href: '/players', current: false },
+  { name: '棋士一覧', href: '/players/kishi', current: false },
   { name: 'ランキング', href: '/ranking', current: false },
   { name: 'おすすめ棋書', href: '/books', current: false },
 ];

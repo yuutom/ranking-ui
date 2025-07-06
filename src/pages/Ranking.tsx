@@ -25,7 +25,7 @@ import { JunisenClass } from '../enum/JunisenClass';
 import { Affiliation } from '../enum/Affiliation';
 import type { Player } from '../types/player';
 import { DateUtils } from '../utils/DateUtils';
-import { jsonPlayers } from '../data/playersJson';
+import { jsonKishi } from '../data/playersJson';
 import { latestRatings, statsMap } from '../data/ratingHistoryJson';
 
 const sortOptions = [
@@ -65,7 +65,7 @@ const filters = [
   },
 ]
 
-const playersWithRating = jsonPlayers.map((player) => {
+const playersWithRating = jsonKishi.map((player) => {
   const rating = latestRatings.get(player.id);
   const stats = statsMap.get(player.id);
 
@@ -375,7 +375,7 @@ export default function Ranking() {
                 {filteredData.map((kishi) => (
                     <tr
                     key={kishi.kishiNumber}
-                    onClick={() => navigate(`/players/${kishi.kishiNumber}`)}
+                    onClick={() => navigate(`/players/kishi/${kishi.kishiNumber}`)}
                     className="cursor-pointer hover:bg-gray-100"
                     >
                     <td className="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">

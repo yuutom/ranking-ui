@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type { Player } from '../types/player'
 import { DateUtils } from '../utils/DateUtils'
 import { ResultStatusIcon } from '../componets/ResultStatusIcon'
-import { jsonPlayers } from '../data/playersJson'
+import { jsonKishi } from '../data/playersJson'
 import { getFilterdRecord, getRanking, jsonRatingHistory, latestRatings, sortedByStreak, sortedByTotal, sortedByWinRate, sortedByWins, statsMap } from '../data/ratingHistoryJson'
 import { extractDisplayGameName } from '../enum/GameCategory'
 import { Title } from '../enum/Title'
@@ -15,14 +15,14 @@ export function calculateExpectedWinRate(selfRating: number, opponentRating: num
 export default function Example() {
   const navigate = useNavigate();
   const { kishiNumber } = useParams<{ kishiNumber: string }>()
-  const player: Player | undefined = jsonPlayers.find(
+  const player: Player | undefined = jsonKishi.find(
     (k) => String(k.kishiNumber) === kishiNumber
   )
   if (!player) {
     return <div className="p-8 text-gray-500">棋士が見つかりません</div>
   }
 
-  const playersWithRating = jsonPlayers.map((player) => {
+  const playersWithRating = jsonKishi.map((player) => {
     const rating = latestRatings.get(player.id);
     return {
       ...player,
@@ -323,7 +323,7 @@ const sortedRatingsWithWinRate = playersWithRating
                             </div>
                             <div className="text-xs text-gray-500 flex flex-wrap gap-1">
                               <span>vs.</span>
-                              <a href={`/players/${result.opponent_number}`} className="underline">
+                              <a href={`/players/kishi/${result.opponent_number}`} className="underline">
                                 {result.opponent_name}
                               </a>
                               <span>({result.opponent_rating.toFixed(0)})</span>
@@ -388,7 +388,7 @@ const sortedRatingsWithWinRate = playersWithRating
                         {sortedRatingsWithWinRate.map((row) => (
                           <tr                     
                             key={row.number}
-                            onClick={() => navigate(`/players/${row.number}`)}
+                            onClick={() => navigate(`/players/kishi/${row.number}`)}
                             className="cursor-pointer hover:bg-gray-100"
                           >
                             <td className="px-3 py-3.5 text-left text-gray-500 text-sm">{row.rank}</td>

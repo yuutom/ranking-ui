@@ -35,9 +35,11 @@ export default function Example() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="players" element={<PlayerList />} />
-          <Route path="players/:kishiNumber" element={<KishiDetail />} />
+          <Route path="players/kishi" element={<PlayerList />} />
+          <Route path="players/kishi/:kishiNumber" element={<KishiDetail />} />
           <Route path="ranking" element={<Ranking />} />
+          <Route path="players/joryu" element={<PlayerList />} />
+          <Route path="players/joryu/:kishiNumber" element={<KishiDetail />} />
           <Route path="books" element={<Books />} />
         </Route>
       </Routes>

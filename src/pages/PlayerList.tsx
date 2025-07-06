@@ -1,11 +1,11 @@
 import KishiInfo from '../componets/KishiInfo'
-import { jsonPlayers } from '../data/playersJson'
+import { jsonKishi } from '../data/playersJson'
 import { Danni } from '../enum/Danni'
 
 export default function PlayerList() {
   return (
     <main className="max-w-screen-md mx-auto">
-    {jsonPlayers.filter((kishi) => kishi.title.length > 0).length > 0 && (
+    {jsonKishi.filter((kishi) => kishi.title.length > 0).length > 0 && (
       <>
         <div className="relative">
           <div aria-hidden="true" className="absolute inset-0 flex items-center">
@@ -18,7 +18,7 @@ export default function PlayerList() {
 
         <div className="mt-4">
           <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {jsonPlayers.filter((kishi) => kishi.title.length > 0).map((kishi) => (
+            {jsonKishi.filter((kishi) => kishi.title.length > 0).map((kishi) => (
                 <KishiInfo key={kishi.id} kishi={kishi} />
               ))}
           </ul>
@@ -26,7 +26,7 @@ export default function PlayerList() {
       </>
     )}
 
-    {jsonPlayers.filter((kishi) => kishi.danni === Danni.DAN9 && kishi.title.length == 0).length > 0 && (
+    {jsonKishi.filter((kishi) => kishi.danni === Danni.DAN9 && kishi.title.length == 0).length > 0 && (
       <>
         <div className="relative mt-4">
           <div aria-hidden="true" className="absolute inset-0 flex items-center">
@@ -39,7 +39,7 @@ export default function PlayerList() {
 
         <div className="mt-4">
           <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {jsonPlayers
+            {jsonKishi
               .filter((kishi) => kishi.danni === Danni.DAN9 && kishi.title.length == 0)
               .map((kishi) => (
                 <KishiInfo key={kishi.id} kishi={kishi} />
@@ -49,7 +49,7 @@ export default function PlayerList() {
       </>
     )}
 
-    {jsonPlayers.filter((kishi) => kishi.danni === Danni.DAN8 && kishi.title.length == 0).length > 0 && (
+    {jsonKishi.filter((kishi) => kishi.danni === Danni.DAN8 && kishi.title.length == 0).length > 0 && (
       <>
         <div className="relative mt-4">
           <div aria-hidden="true" className="absolute inset-0 flex items-center">
@@ -62,7 +62,7 @@ export default function PlayerList() {
 
         <div className="mt-4">
           <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {jsonPlayers
+            {jsonKishi
               .filter((kishi) => kishi.danni === Danni.DAN8 && kishi.title.length == 0)
               .map((kishi) => (
                 <KishiInfo key={kishi.id} kishi={kishi} />
