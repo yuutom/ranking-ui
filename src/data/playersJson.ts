@@ -3,7 +3,6 @@ import { Affiliation } from '../enum/Affiliation'
 import { Danni } from '../enum/Danni'
 import { JunisenClass } from '../enum/JunisenClass'
 import { PlayerCategory } from '../enum/PlayerCategory'
-import { PlayingStyle } from '../enum/PlayingStyle'
 import { RyuohsenClass } from '../enum/RyuohsenClass'
 import { Title } from '../enum/Title'
 import type { Player } from '../types/player'
@@ -18,7 +17,6 @@ export function convertEnums(raw: any): Player {
     const danniList = Object.values(Danni)
     const titleList = Object.values(Title)
     const affiliationList = Object.values(Affiliation)
-    const styleList = Object.values(PlayingStyle)
     const categoryList = Object.values(PlayerCategory)
   
     return {
@@ -38,7 +36,6 @@ export function convertEnums(raw: any): Player {
       danni: danniList[raw.danni] ?? Danni.NONE,
       title: raw.title.map((t: any) => titleList[t]),
       affiliation: affiliationList[raw.affiliation] ?? Affiliation.NONE,
-      playingStyle: styleList[raw.playing_style] ?? PlayingStyle.NONE,
       playerCategory: categoryList[raw.player_category] ?? PlayerCategory.KISHI,
       isActive: raw.is_active,
     }

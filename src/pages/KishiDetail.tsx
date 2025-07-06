@@ -211,8 +211,8 @@ const sortedRatingsWithWinRate = playersWithRating
                         <dd className="mt-1 text-sm text-gray-900">{player.affiliation}</dd>
                       </div>
                       <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">棋風</dt>
-                        <dd className="mt-1 text-sm text-gray-900">{player.playingStyle}</dd>
+                        <dt className="text-sm font-medium text-gray-500">カテゴリ</dt>
+                        <dd className="mt-1 text-sm text-gray-900">{player.playerCategory}</dd>
                       </div>
                       <div className="sm:col-span-1">
                         <dt className="text-sm font-medium text-gray-500">順位戦</dt>

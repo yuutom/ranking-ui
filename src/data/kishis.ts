@@ -3,7 +3,6 @@ import { Danni } from "../enum/Danni";
 import { GameCategory } from "../enum/GameCategory";
 import { JunisenClass } from "../enum/JunisenClass";
 import { PlayerCategory } from "../enum/PlayerCategory";
-import { PlayingStyle } from "../enum/PlayingStyle";
 import { ResultStatus } from "../enum/ResultStatus";
 import { RyuohsenClass } from "../enum/RyuohsenClass";
 import { Title } from "../enum/Title";
@@ -27,7 +26,6 @@ export const dummyKishi: Player[] = [
         danni: Danni.DAN8,
         title: [Title.EIOH],
         affiliation: Affiliation.KANTOU,
-        playingStyle: PlayingStyle.IBISHA,
         resultsFromKishi: [
             {
                 gameName: "叡王戦 第5局",
@@ -91,7 +89,6 @@ export const dummyKishi: Player[] = [
         danni: Danni.DAN9,
         title: [Title.MEIJIN, Title.RYUOH, Title.KIOH, Title.KISEI, Title.OUI, Title.OUSHO, Title.OUZA],
         affiliation: Affiliation.KANSAI,
-        playingStyle: PlayingStyle.IBISHA,
         record: {wins: 10, loses: 1, total_ranking: 1, wins_ranking: 1, winning_rate_ranking: 1},
         playerCategory: PlayerCategory.KISHI,
         isActive: true,
@@ -113,7 +110,6 @@ export const dummyKishi: Player[] = [
         danni: Danni.DAN8,
         title: [],
         affiliation: Affiliation.KANSAI,
-        playingStyle: PlayingStyle.HURIBISHA,
         record: {wins: 2, loses: 9, total_ranking: 20, wins_ranking: 20, winning_rate_ranking: 20},
         playerCategory: PlayerCategory.KISHI,
         isActive: true,

@@ -2,7 +2,6 @@ import type { Affiliation } from "../enum/Affiliation";
 import type { Danni } from "../enum/Danni";
 import type { JunisenClass } from "../enum/JunisenClass";
 import type { PlayerCategory } from "../enum/PlayerCategory";
-import type { PlayingStyle } from "../enum/PlayingStyle";
 import type { RyuohsenClass } from "../enum/RyuohsenClass";
 import type { Title } from "../enum/Title";
 
@@ -23,7 +22,6 @@ export interface Player {
     danni: Danni;
     title: Title[];
     affiliation?: Affiliation;
-    playingStyle?: PlayingStyle;
     playerCategory: PlayerCategory;
     isActive: boolean;
 }

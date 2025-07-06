@@ -22,7 +22,6 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { RyuohsenClass } from '../enum/RyuohsenClass';
 import { JunisenClass } from '../enum/JunisenClass';
-import { PlayingStyle } from '../enum/PlayingStyle';
 import { Affiliation } from '../enum/Affiliation';
 import type { Player } from '../types/player';
 import { DateUtils } from '../utils/DateUtils';
@@ -54,15 +53,6 @@ const filters = [
       { value: JunisenClass.MEIJIN, label: JunisenClass.MEIJIN },
       { value: JunisenClass.A, label: JunisenClass.A },
       { value: JunisenClass.B1, label: JunisenClass.B1 },
-    ],
-  },
-  {
-    id: "playingStyle",
-    name: "棋風",
-    options: [
-      { value: PlayingStyle.IBISHA, label: PlayingStyle.IBISHA },
-      { value: PlayingStyle.HURIBISHA, label: PlayingStyle.HURIBISHA },
-      { value: PlayingStyle.DUAL, label: PlayingStyle.DUAL },
     ],
   },
   {
