@@ -1,16 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
-import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import { Disclosure, DisclosureButton, Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
+import { ChevronDownIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
 
 const navItems = [
-  { name: 'Home', href: '/', current: true },
-  { name: '棋士一覧', href: '/players/kishi', current: false },
-  { name: 'ランキング', href: '/ranking', current: false },
-  { name: 'おすすめ棋書', href: '/books', current: false },
+  { name: 'Home', href: ['/'], current: true },
+  { name: '棋士一覧', href: ['/players/kishi', '/players/joryu'], current: false },
+  { name: 'ランキング', href: ['/ranking', '/ranking/joryu'], current: false },
+  { name: 'おすすめ棋書', href: ['/books'], current: false },
 ];
+
+const listOptions = [
+  { name: '棋士一覧', href: "/players/kishi" },
+  { name: '女流棋士一覧', href: "/players/joryu" },
+]
+
+const rankingOptions = [
+  { name: '棋士ランキング', href: "/ranking" },
+  { name: '女流棋士ランキング', href: "/ranking" },
+]
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -24,7 +34,7 @@ export default function Layout() {
     setNavigation(
       navItems.map((item) => ({
         ...item,
-        current: item.href === location.pathname,
+        current: item.href.includes(location.pathname),
       }))
     );
   }, [location.pathname]);
@@ -68,43 +78,112 @@ export default function Layout() {
                 </DisclosureButton>
               </div>
             </div>
-            <nav aria-label="Global" className="hidden lg:flex lg:space-x-8 lg:py-2">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  aria-current={item.current ? 'page' : undefined}
-                  className={classNames(
-                    item.current ? 'bg-gray-100 text-gray-900' : 'text-gray-900 hover:bg-gray-50 hover:text-gray-900',
-                    'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium',
-                  )}
-                >
-                  {item.name}
-                </Link>
-              ))}
+            <nav aria-label="Global" className="hidden lg:flex lg:space-x-6 lg:py-2">
+              {navigation.map((item) => {
+                if (item.name === '棋士一覧') {
+                  return (
+                    <Popover key={item.name} className="relative">
+                      {({ close }) => (
+                        <>
+                          <PopoverButton
+                            className={classNames(
+                              item.current
+                                ? 'bg-gray-100 text-gray-900'
+                                : 'text-gray-900 hover:bg-gray-50 hover:text-gray-900',
+                              'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium'
+                            )}
+                          >
+                            <span>{item.name}</span>
+                            <ChevronDownIcon aria-hidden="true" className="size-5" />
+                          </PopoverButton>
+                          <PopoverPanel
+                            transition
+                            className="absolute left-1/2 z-10 mt-5 flex w-screen max-w-min -translate-x-1/2 px-4 transition 
+                              data-[closed]:translate-y-1 data-[closed]:opacity-0 
+                              data-[enter]:duration-200 data-[leave]:duration-150 
+                              data-[enter]:ease-out data-[leave]:ease-in"
+                          >
+                            <div className="w-56 shrink rounded-xl bg-white p-4 text-sm/6 font-medium text-gray-900 shadow-lg ring-1 ring-gray-900/5">
+                              {listOptions.map((option) => (
+                                <Link
+                                  key={option.name}
+                                  to={option.href}
+                                  className="block p-2 hover:text-indigo-600"
+                                  onClick={() => close()}
+                                >
+                                  {option.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </PopoverPanel>
+                        </>
+                      )}
+                    </Popover>
+                  );
+                }
+
+                if (item.name === 'ランキング') {
+                  return (
+                    <Popover key={item.name} className="relative">
+                      <PopoverButton
+                        className={classNames(
+                          item.current
+                            ? 'bg-gray-100 text-gray-900'
+                            : 'text-gray-900 hover:bg-gray-50 hover:text-gray-900',
+                          'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium'
+                        )}
+                      >
+                        <span>{item.name}</span>
+                        <ChevronDownIcon aria-hidden="true" className="size-5" />
+                      </PopoverButton>
+                      <PopoverPanel
+                        transition
+                        className="absolute left-1/2 z-10 mt-5 flex w-screen max-w-min -translate-x-1/2 px-4 transition 
+                          data-[closed]:translate-y-1 data-[closed]:opacity-0 
+                          data-[enter]:duration-200 data-[leave]:duration-150 
+                          data-[enter]:ease-out data-[leave]:ease-in"
+                      >
+                        {({ close }) => (
+                          <div className="w-56 shrink rounded-xl bg-white p-4 text-sm/6 font-medium text-gray-900 shadow-lg ring-1 ring-gray-900/5">
+                            {rankingOptions.map((option) => (
+                              <Link
+                                key={option.name}
+                                to={option.href}
+                                onClick={() => close()}
+                                className="block p-2 hover:text-indigo-600"
+                              >
+                                {option.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </PopoverPanel>
+                    </Popover>
+
+                  );
+                }
+
+                // 通常リンク
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href[0]}
+                    aria-current={item.current ? 'page' : undefined}
+                    className={classNames(
+                      item.current
+                        ? 'bg-gray-100 text-gray-900'
+                        : 'text-gray-900 hover:bg-gray-50 hover:text-gray-900',
+                      'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium'
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
-    
-          <DisclosurePanel as="nav" aria-label="Global" className="lg:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
-              {navigation.map((item) => (
-                <DisclosureButton
-                  key={item.name}
-                  as="a"
-                  href={item.href}
-                  aria-current={item.current ? 'page' : undefined}
-                  className={classNames(
-                    item.current ? 'bg-gray-100 text-gray-900' : 'text-gray-900 hover:bg-gray-50 hover:text-gray-900',
-                    'block rounded-md px-3 py-2 text-base font-medium',
-                  )}
-                >
-                  {item.name}
-                </DisclosureButton>
-              ))}
-            </div>
-          </DisclosurePanel>
         </Disclosure>
-    {/* ナビゲーションバー */}
+        {/* ナビゲーションバー */}
 
         <main className="py-10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
