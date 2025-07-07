@@ -2,29 +2,29 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type { Player } from '../types/player'
 import { DateUtils } from '../utils/DateUtils'
 import { ResultStatusIcon } from '../componets/ResultStatusIcon'
-import { jsonKishi } from '../data/playersJson'
-import { getFilterdRecord, getRanking, jsonRatingHistory, latestKishiRatings, sortedByStreak, sortedByTotal, sortedByWinRate, sortedByWins, statsMap } from '../data/ratingHistoryJson'
+import { jsonJoryu } from '../data/playersJson'
+import { getFilterdRecord, getRanking, jsonRatingHistory, latestJoryuRatings, sortedByStreak, sortedByTotal, sortedByWinRate, sortedByWins, statsMap } from '../data/ratingHistoryJson'
 import { extractDisplayGameName } from '../enum/GameCategory'
 import { Title } from '../enum/Title'
 import { RatingChart } from '../componets/RatingChart'
-import { getSlug } from '../enum/PlayerCategory'
+import { getSlug, PlayerCategory } from '../enum/PlayerCategory'
 
 export function calculateExpectedWinRate(selfRating: number, opponentRating: number): number {
   return 1 / (1 + Math.pow(10, (opponentRating - selfRating) / 400));
 }
 
-export default function Example() {
+export default function JoryuDetail() {
   const navigate = useNavigate();
   const { kishiNumber } = useParams<{ kishiNumber: string }>()
-  const player: Player | undefined = jsonKishi.find(
+  const player: Player | undefined = jsonJoryu.find(
     (k) => String(k.kishiNumber) === kishiNumber
   )
   if (!player) {
     return <div className="p-8 text-gray-500">棋士が見つかりません</div>
   }
 
-  const playersWithRating = jsonKishi.map((player) => {
-    const rating = latestKishiRatings.get(player.id);
+  const playersWithRating = jsonJoryu.map((player) => {
+    const rating = latestJoryuRatings.get(player.id);
     return {
       ...player,
       rating: rating?.rating ?? 0,
@@ -50,12 +50,12 @@ export default function Example() {
     return player?.danni ?? "";
   })();
 
-  const sortedRatings = Array.from(latestKishiRatings.entries())
+  const sortedRatings = Array.from(latestJoryuRatings.entries())
   .sort((a, b) => b[1].rating - a[1].rating)
   .map(([id]) => id); // id順に並んだ配列
-  
+
   const playerRanking = sortedRatings.indexOf(player.id) + 1;
-  const playerRating = latestKishiRatings.get(player.id)?.rating;
+  const playerRating = latestJoryuRatings.get(player.id)?.rating;
 
   const myStats = statsMap.get(player.id);
   const winRateRanking = getRanking(sortedByWinRate, player.id);
@@ -77,6 +77,7 @@ const sortedRatingsWithWinRate = playersWithRating
         rank: index + 1,
         name: r.nameKana,
         id: r.id,
+        category: r.playerCategory,
         number: r.kishiNumber,
         rating: r.rating,
         expectedWinRate: "-",
@@ -88,6 +89,7 @@ const sortedRatingsWithWinRate = playersWithRating
         rank: index + 1,
         name: r.nameKana,
         id: r.id,
+        category: r.playerCategory,
         number: r.kishiNumber,
         rating: r.rating,
         expectedWinRate: "-",
@@ -100,6 +102,7 @@ const sortedRatingsWithWinRate = playersWithRating
       rank: index + 1,
       name: r.nameKana,
       id: r.id,
+      category: r.playerCategory,
       number: r.kishiNumber,
       rating: r.rating,
       expectedWinRate: winRate,
@@ -324,7 +327,7 @@ const sortedRatingsWithWinRate = playersWithRating
                             </div>
                             <div className="text-xs text-gray-500 flex flex-wrap gap-1">
                               <span>vs.</span>
-                              <a href={`/players/${getSlug(result.opponent_category)}}/${result.opponent_number}`} className="underline">
+                              <a href={`/players/${getSlug(result.opponent_category)}/${result.opponent_number}`} className="underline">
                                 {result.opponent_name}
                               </a>
                               <span>({result.opponent_rating.toFixed(0)})</span>
@@ -389,7 +392,7 @@ const sortedRatingsWithWinRate = playersWithRating
                         {sortedRatingsWithWinRate.map((row) => (
                           <tr                     
                             key={row.number}
-                            onClick={() => navigate(`/players/kishi/${row.number}`)}
+                            onClick={() => navigate(`/players/${getSlug(row.category ? row.category : PlayerCategory.OTHER)}/${row.number}`)}
                             className="cursor-pointer hover:bg-gray-100"
                           >
                             <td className="px-3 py-3.5 text-left text-gray-500 text-sm">{row.rank}</td>

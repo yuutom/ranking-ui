@@ -19,7 +19,7 @@ const listOptions = [
 
 const rankingOptions = [
   { name: '棋士ランキング', href: "/ranking" },
-  { name: '女流棋士ランキング', href: "/ranking" },
+  { name: '女流棋士ランキング', href: "/ranking/joryu" },
 ]
 
 function classNames(...classes: string[]) {

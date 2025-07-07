@@ -25,8 +25,8 @@ import { JunisenClass } from '../enum/JunisenClass';
 import { Affiliation } from '../enum/Affiliation';
 import type { Player } from '../types/player';
 import { DateUtils } from '../utils/DateUtils';
-import { jsonKishi } from '../data/playersJson';
-import { latestKishiRatings, statsMap } from '../data/ratingHistoryJson';
+import { jsonJoryu } from '../data/playersJson';
+import { latestJoryuRatings, statsMap } from '../data/ratingHistoryJson';
 
 const sortOptions = [
   { name: "Rate" },
@@ -65,8 +65,8 @@ const filters = [
   },
 ]
 
-const playersWithRating = jsonKishi.map((player) => {
-  const rating = latestKishiRatings.get(player.id);
+const playersWithRating = jsonJoryu.map((player) => {
+  const rating = latestJoryuRatings.get(player.id);
   const stats = statsMap.get(player.id);
 
   return {
@@ -80,7 +80,7 @@ const playersWithRating = jsonKishi.map((player) => {
   };
 });
 
-export default function Ranking() {
+export default function JoryuRanking() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: Set<string> }>({});
@@ -352,12 +352,6 @@ export default function Ranking() {
                     所属
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
-                    順位戦
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
-                    竜王戦
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
                     勝敗
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
@@ -375,7 +369,7 @@ export default function Ranking() {
                 {filteredData.map((kishi) => (
                     <tr
                     key={kishi.kishiNumber}
-                    onClick={() => navigate(`/players/kishi/${kishi.kishiNumber}`)}
+                    onClick={() => navigate(`/players/joryu/${kishi.kishiNumber}`)}
                     className="cursor-pointer hover:bg-gray-100"
                     >
                     <td className="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
@@ -393,8 +387,6 @@ export default function Ranking() {
                     </td>
                     <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.danni}</td>
                     <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.affiliation}</td>
-                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.junisenClass}</td>
-                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.ryuohsenClass}</td>
                     <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.wins}-${kishi.stats.total - kishi.stats.wins}` : "-"}</td>
                     <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">
                         {kishi.stats && (kishi.stats.total > 0) ? (

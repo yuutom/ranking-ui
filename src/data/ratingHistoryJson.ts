@@ -1,6 +1,7 @@
 import { PlayerCategory } from '../enum/PlayerCategory'
 import { ResultStatus } from '../enum/ResultStatus';
 import type { RatingRecord } from '../types/RatingRecord'
+import { jsonJoryu, jsonKishi } from './playersJson';
 import rawRatingHistory from './rating_history.json'
 
 // プレイヤーごとの全ての対局結果のリスト
@@ -38,10 +39,28 @@ export function getFilterdRecord(playerId: string): RatingRecord[] {
 }
 
 // player_id: 最新の対局時のRatingRecord
-export const latestRatings = (() => {
+export const latestKishiRatings = (() => {
   const map = new Map<string, RatingRecord>();
+  const kishiRatingHistory = jsonRatingHistory
+  .filter((record) => record.player_category === PlayerCategory.KISHI)
+  .filter((record) => jsonKishi.map((p) => p.id).includes(record.player_id))
 
-  for (const r of jsonRatingHistory as RatingRecord[]) {
+  for (const r of kishiRatingHistory as RatingRecord[]) {
+    const existing = map.get(r.player_id);
+    if (!existing || new Date(r.date) > new Date(existing.date)) {
+      map.set(r.player_id, r);
+    }
+  }
+  return map;
+})();
+
+export const latestJoryuRatings = (() => {
+  const map = new Map<string, RatingRecord>();
+  const joryuRatingHistory = jsonRatingHistory
+  .filter((record) => record.player_category === PlayerCategory.JORYU)
+  .filter((record) => jsonJoryu.map((p) => p.id).includes(record.player_id))
+
+  for (const r of joryuRatingHistory as RatingRecord[]) {
     const existing = map.get(r.player_id);
     if (!existing || new Date(r.date) > new Date(existing.date)) {
       map.set(r.player_id, r);

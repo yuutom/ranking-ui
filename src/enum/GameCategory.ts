@@ -16,7 +16,7 @@ export enum GameCategory {
     ABEMA = "ABEMAトーナメント",
     SUNTORY = "東西対抗戦",
     OTHER = "その他",
-    HAKUREI = "白玲戦・女流順位戦",
+    HAKUREI = "白玲戦",
     SEIREI = "清麗戦",
     MYNAVI = "マイナビ女子オープン",
     JORYU_OUZA = "女流王座戦",
