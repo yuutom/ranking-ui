@@ -10,6 +10,7 @@ import rawPlayers from './players.json'
 
 
 export const jsonKishi: Player[] = rawPlayers.map(convertEnums).filter((k) => k.playerCategory == PlayerCategory.KISHI);
+export const jsonJoryu: Player[] = rawPlayers.map(convertEnums).filter((k) => k.playerCategory == PlayerCategory.JORYU);
 
 export function convertEnums(raw: any): Player {
     const ryuohsenList = Object.values(RyuohsenClass)
