@@ -1,106 +1,124 @@
-import { dummyPickedUpGames } from "../data/games";
+import { jsonJoryu, jsonKishi } from "../data/playersJson";
+import { latestJoryuRatings, latestKishiRatings } from "../data/ratingHistoryJson";
+import { useNavigate } from "react-router-dom";
 import { DateUtils } from "../utils/DateUtils";
-import { ResultStatusIcon } from "../componets/ResultStatusIcon";
-import { ResultStatus } from "../enum/ResultStatus";
 
 export default function Home() {
 
+    const kishiWithRating = jsonKishi
+      .map((player) => {
+        const rating = latestKishiRatings.get(player.id);
+        return {
+          ...player,
+          rating: rating?.rating ?? 0,
+        };
+      })
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 10)
+      .map((player, index) => ({
+        ...player,
+        rank: index + 1,
+      }));
+    const joryuWithRating = jsonJoryu
+      .map((player) => {
+        const rating = latestJoryuRatings.get(player.id);
+        return {
+          ...player,
+          rating: rating?.rating ?? 0,
+        };
+      })
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 10)
+      .map((player, index) => ({
+        ...player,
+        rank: index + 1,
+      }));
+    const navigate = useNavigate();
+
     return (
-        <main className="py-10">
-        <div className="mt-20 max-w-screen-md mx-auto">
-            <div className="relative">
-                <div aria-hidden="true" className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
+        <div className="mx-auto mt-4 grid max-w-3xl grid-cols-2 gap-15 sm:px-6 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-2">
+            <section className="lg:col-span-1 lg:col-start-1 h-full flex flex-col">
+                <div className="bg-white px-4 py-2 shadow sm:rounded-4xl sm:px-6 flex-1 flex flex-col">
+                  <div className="justify-between items-start">
+                    <h2 id="timeline-title" className="mt-4 text-base font-semibold text-gray-900">
+                      棋士
+                    </h2>
+                    <table className="mt-4 min-w-full divide-y divide-gray-300">
+                      <thead>
+                      <tr>
+                          <th className="px-3 py-3.5 text-left">順位</th>
+                          <th className="px-3 py-3.5 text-left">名前</th>
+                          <th className="px-3 py-3.5 text-center">レート</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {kishiWithRating.map((row) => (
+                          <tr                     
+                            key={row.kishiNumber}
+                            onClick={() => navigate(`/players/kishi/${row.kishiNumber}`)}
+                            className="cursor-pointer hover:bg-gray-100"
+                          >
+                            <td className="px-3 py-3.5 text-left text-gray-500 text-sm">{row.rank}</td>
+                            <td className="whitespace-nowrap py-3 pl-4 pr-3 text-sm sm:pl-0">
+                                <div className="flex items-center">
+                                <img alt="" src={row.imageUrl} className="ml-2 size-10 object-cover rounded-full" />
+                                <div className="ml-4">
+                                    <div className="font-medium text-gray-900">{row.nameKana} 
+                                    <span className="text-xs text-gray-500"> ({DateUtils.getCurrentAge(row.birthDate)}歳)</span>
+                                    </div>
+                                </div>
+                                </div>
+                            </td>
+                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{row.rating.toFixed(0)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-                <div className="relative flex justify-center">
-                    <span className="bg-white px-3 text-base font-semibold text-gray-900">注目の対局</span>
+            </section>
+
+            <section className="lg:col-span-1 lg:col-start-2 h-full flex flex-col">
+                <div className="bg-white px-4 py-5 shadow sm:rounded-4xl sm:px-6 flex-1 flex flex-col">
+                  <div className="justify-between items-start">
+                    <h2 id="timeline-title" className="text-base font-semibold text-gray-900">
+                      女流棋士
+                    </h2>
+                    <table className="mt-4 min-w-full divide-y divide-gray-300">
+                      <thead>
+                      <tr>
+                          <th className="px-3 py-3.5 text-left">順位</th>
+                          <th className="px-3 py-3.5 text-left">名前</th>
+                          <th className="px-3 py-3.5 text-center">レート</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {joryuWithRating.map((row) => (
+                          <tr                     
+                            key={row.kishiNumber}
+                            onClick={() => navigate(`/players/joryu/${row.kishiNumber}`)}
+                            className="cursor-pointer hover:bg-gray-100"
+                          >
+                            <td className="px-3 py-3.5 text-left text-gray-500 text-sm">{row.rank}</td>
+                            <td className="whitespace-nowrap py-3 pl-4 pr-3 text-sm sm:pl-0">
+                                <div className="flex items-center">
+                                <img alt="" src={row.imageUrl} className="ml-2 size-10 object-cover rounded-full" />
+                                <div className="ml-4">
+                                    <div className="font-medium text-gray-900">{row.nameKana} 
+                                    <span className="text-xs text-gray-500"> ({DateUtils.getCurrentAge(row.birthDate)}歳)</span>
+                                    </div>
+                                </div>
+                                </div>
+                            </td>
+                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{row.rating.toFixed(0)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-            </div>
+            </section>
         </div>
-
-        <div className="mt-6 mx-auto max-w-screen-md">
-            <div className="flex item-center text-center mt-4 mb-4 mr-4 px-4 justify-end space-x-4">
-                <div className="flex space-x-2">
-                    {ResultStatusIcon(ResultStatus.WIN)}
-                    <span className="size-1.5 text-xs text-gray-500">勝</span>
-                </div>
-                <div className="flex space-x-2">
-                    {ResultStatusIcon(ResultStatus.DEFEATE)}
-                    <span className="size-1.5 text-xs text-gray-500">負</span>
-                </div>
-                <div className="flex space-x-2">
-                    {ResultStatusIcon(ResultStatus.TBD)}
-                    <span className="size-1.5 text-xs text-gray-500">未</span>
-                </div>
-            </div>
-        <ul
-        role="list"
-        className="divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl"
-        >
-        {dummyPickedUpGames.map((game) => (
-            <li className="grid grid-cols-13 items-center px-4 py-5 hover:bg-gray-50 sm:px-6">
-            <div className="col-span-2 text-gray-500 text-sm">{game.gameName}</div>
-            {/* 先手 */}
-            <div className="col-span-3 flex items-center gap-x-4 justify-center">
-                <img
-                alt=""
-                src={`https://www.shogi.or.jp/images/player/pro/${game.senteNumber}.jpg`}
-                className="size-11 object-cover rounded-full bg-gray-50"
-                />
-                <div className="flex">
-                <p className="text-sm font-semibold text-gray-900">
-                    <a href={`/players/${game.senteNumber}`} className="hover:underline">
-                    {game.senteName}
-                    </a>
-                </p>
-                </div>
-            </div>
-
-            <div className="col-span-1 flex items-center gap-x-1.5">
-                {ResultStatusIcon(game.senteResult)}
-            </div>
-
-            {/* vs */}
-            <div className="col-span-1 text-sm text-center font-medium text-gray-500">vs</div>
-
-            <div className="col-span-1 mt-1 flex items-center gap-x-1.5 justify-end">
-                {ResultStatusIcon(game.goteResult)}
-            </div>
-
-            {/* 後手 */}
-            <div className="col-span-3 flex items-center gap-x-4 justify-center">
-                <div className="text-right">
-                    <p className="text-sm font-semibold text-gray-900">
-                        <a href={`/players/${game.goteNumber}`} className="hover:underline">
-                        {game.goteName}
-                        </a>
-                    </p>
-                </div>
-                <img
-                    alt=""
-                    src={`https://www.shogi.or.jp/images/player/pro/${game.goteNumber}.jpg`}
-                    className="size-11 object-cover rounded-full bg-gray-50"
-                />
-            </div>
-            
-            <div className="col-span-2 text-right text-sm text-gray-500">{DateUtils.formatJapaneseDateWithWeekday(game.date)}</div>
-            </li>
-
-        ))}
-        </ul>
-        </div>
-
-        <div className="mt-20 max-w-screen-md mx-auto">
-            <div className="relative">
-                <div aria-hidden="true" className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center">
-                    <span className="bg-white px-3 text-base font-semibold text-gray-900">記事一覧</span>
-                </div>
-            </div>
-        </div>
-        </main>
     );
   }
   
