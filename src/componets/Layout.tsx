@@ -8,7 +8,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 const navItems = [
   { name: 'Home', href: ['/'], current: true },
   { name: '棋士一覧', href: ['/players/kishi', '/players/joryu'], current: false },
-  { name: 'ランキング', href: ['/ranking', '/ranking/joryu'], current: false },
+  { name: 'ランキング', href: ['/ranking/kishi', '/ranking/joryu'], current: false },
   { name: 'おすすめ棋書', href: ['/books'], current: false },
 ];
 
@@ -18,7 +18,7 @@ const listOptions = [
 ]
 
 const rankingOptions = [
-  { name: '棋士ランキング', href: "/ranking" },
+  { name: '棋士ランキング', href: "/ranking/kishi" },
   { name: '女流棋士ランキング', href: "/ranking/joryu" },
 ]
 

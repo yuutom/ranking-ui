@@ -80,7 +80,7 @@ const playersWithRating = jsonKishi.map((player) => {
   };
 });
 
-export default function Ranking() {
+export default function KishiRanking() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: Set<string> }>({});

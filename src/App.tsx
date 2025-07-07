@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import 'preline'
 import Layout from './componets/Layout';
 import KishiDetail from './pages/KishiDetail';
-import Ranking from './pages/Ranking';
+import KishiRanking from './pages/KishiRanking';
 import Books from './pages/Books';
 import JoryuList from './pages/JoryuList';
 import JoryuRanking from './pages/JoryuRanking';
@@ -39,11 +39,11 @@ export default function Example() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="players/kishi" element={<PlayerList />} />
-          <Route path="players/kishi/:kishiNumber" element={<KishiDetail />} />
-          <Route path="ranking" element={<Ranking />} />
-          <Route path="ranking/joryu" element={<JoryuRanking />} />
           <Route path="players/joryu" element={<JoryuList />} />
+          <Route path="players/kishi/:kishiNumber" element={<KishiDetail />} />
           <Route path="players/joryu/:kishiNumber" element={<JoryuDetail />} />
+          <Route path="ranking/kishi" element={<KishiRanking />} />
+          <Route path="ranking/joryu" element={<JoryuRanking />} />
           <Route path="books" element={<Books />} />
         </Route>
       </Routes>
