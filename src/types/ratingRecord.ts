@@ -16,7 +16,7 @@ export interface RatingRecord {
     delta: number;
     opponent_rating: number;
     opponent_rating_delta: number;
-    game_id: number;
+    game_id: string;
     game_name: string;
     result_status: ResultStatus;
   };

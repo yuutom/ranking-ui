@@ -2,6 +2,9 @@ import { jsonJoryu, jsonKishi } from "../data/playersJson";
 import { latestJoryuRatings, latestKishiRatings } from "../data/ratingHistoryJson";
 import { useNavigate } from "react-router-dom";
 import { DateUtils } from "../utils/DateUtils";
+import { getPickedUpRecentGames } from "../data/gamesJson";
+import { ResultStatusIcon } from "../componets/ResultStatusIcon";
+import { extractDisplayGameName } from "../enum/GameCategory";
 
 export default function Home() {
 
@@ -118,6 +121,42 @@ export default function Home() {
                   </div>
                 </div>
             </section>
+
+            <section className="lg:col-span-2 lg:col-start-1 h-full flex flex-col">
+                <div className="bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6 flex-1 flex flex-col">
+                  <div className="justify-between items-start">
+                    <h2 id="timeline-title" className="text-lg font-medium text-gray-900">
+                      注目の対局結果
+                    </h2>
+                    <table className="mt-8 min-w-full divide-y divide-gray-300">
+                      <thead>
+                      <tr>
+                          <th className="px-3 py-3.5 text-left">順位</th>
+                          <th className="px-3 py-3.5 text-center">名前</th>
+                          <th className="px-3 py-3.5 text-center">レート</th>
+                          <th className="px-3 py-3.5 text-center">勝率</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {getPickedUpRecentGames().map((row) => (
+                          <tr                     
+                            key={row.game_id}
+                            onClick={() => navigate(`/players/kishi/${row.sente_player_number}`)}
+                            className="cursor-pointer hover:bg-gray-100"
+                          >
+                            <td className="px-3 py-3.5 text-left text-gray-500 text-sm">{extractDisplayGameName(row.game_name)}</td>
+                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{DateUtils.formatShortDate(row.date[0])}</td>
+                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{ResultStatusIcon(row.sente_player_result)}</td>
+                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm underline">{row.sente_player_name}</td>
+                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{row.sente_rating.toFixed(0)}</td>
+                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{row.gote_player_name}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
         </div>
     );
   }
