@@ -335,77 +335,79 @@ export default function JoryuRanking() {
       </div>
     </div>
 
-    <div className="px-4 sm:px-6 lg:px-8">
-      <div className="mt-2 flow-root">
-        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead>
-                <tr>
-                  <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
-                    名前 (年齢 / デビュー年齢)
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
-                    段位
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
-                    所属
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
-                    勝敗
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
-                    勝率
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
-                    連勝
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
-                    Rate
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {filteredData.map((kishi) => (
-                    <tr
-                    key={kishi.kishiNumber}
-                    onClick={() => navigate(`/players/joryu/${kishi.kishiNumber}`)}
-                    className="cursor-pointer hover:bg-gray-100"
-                    >
-                    <td className="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
-                      <div className="flex items-center">
-                        <div className="size-11 shrink-0">
-                          <img alt="" src={kishi.imageUrl} className="ml-2 size-11 object-cover rounded-full" />
-                        </div>
-                        <div className="ml-4">
-                          <div className="font-medium text-gray-900">{kishi.nameKana} 
-                            <span className="text-xs text-gray-500"> ({DateUtils.getCurrentAge(kishi.birthDate)}歳 / {DateUtils.getDebutAge(kishi.birthDate, kishi.debutDate)}歳)</span>
-                          </div>
-                          <div className="mt-1 text-gray-500">{kishi.nameRome}</div>
-                        </div>
+    <div className="mt-2 flow-root">
+      <div className="inline-block min-w-full py-2 align-middle overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-300">
+          <thead>
+            <tr>
+              <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                順位
+              </th>
+              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">
+                名前 (年齢 / デビュー年齢)
+              </th>
+              <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                段位
+              </th>
+              <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                所属
+              </th>
+              <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                勝敗
+              </th>
+              <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                勝率
+              </th>
+              <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                連勝
+              </th>
+              <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                Rate
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 bg-white">
+            {filteredData.map((kishi, index) => (
+                <tr
+                key={kishi.kishiNumber}
+                onClick={() => navigate(`/players/joryu/${kishi.kishiNumber}`)}
+                className="cursor-pointer hover:bg-gray-100"
+                >
+                <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">
+                  {index + 1}
+                </td>
+                <td className="whitespace-nowrap py-5 pl-4 pr-3 text-sm sm:pl-0">
+                  <div className="flex items-center">
+                    <div className="size-11 shrink-0">
+                      <img alt="" src={kishi.imageUrl} className="ml-2 size-11 object-cover rounded-full" />
+                    </div>
+                    <div className="ml-4">
+                      <div className="font-medium text-gray-900">{kishi.nameKana} 
+                        <span className="text-xs text-gray-500"> ({DateUtils.getCurrentAge(kishi.birthDate)}歳 / {DateUtils.getDebutAge(kishi.birthDate, kishi.debutDate)}歳)</span>
                       </div>
-                    </td>
-                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.danni}</td>
-                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.affiliation}</td>
-                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.wins}-${kishi.stats.total - kishi.stats.wins}` : "-"}</td>
-                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">
-                        {kishi.stats && (kishi.stats.total > 0) ? (
-                        <>
-                        {((kishi.stats.wins / (kishi.stats.total))).toFixed(2)}
-                        </>
-                        ) : (
-                        "-"
-                        )}</td>
-                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.maxStreak}` : "-"}</td>
-                    <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.rating.toFixed(0)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                      <div className="mt-1 text-gray-500">{kishi.nameRome}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.danni}</td>
+                <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.affiliation}</td>
+                <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.wins}-${kishi.stats.total - kishi.stats.wins}` : "-"}</td>
+                <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">
+                    {kishi.stats && (kishi.stats.total > 0) ? (
+                    <>
+                    {((kishi.stats.wins / (kishi.stats.total))).toFixed(2)}
+                    </>
+                    ) : (
+                    "-"
+                    )}</td>
+                <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.stats ? `${kishi.stats.maxStreak}` : "-"}</td>
+                <td className="whitespace-nowrap text-center px-3 py-5 text-sm text-gray-500">{kishi.rating.toFixed(0)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
-</div>
+  </div>
   )
 }
