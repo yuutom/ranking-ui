@@ -128,32 +128,59 @@ export default function Home() {
                     <h2 id="timeline-title" className="text-lg font-medium text-gray-900">
                       注目の対局結果
                     </h2>
-                    <table className="mt-8 min-w-full divide-y divide-gray-300">
-                      <thead>
-                      <tr>
-                          <th className="px-3 py-3.5 text-left">順位</th>
-                          <th className="px-3 py-3.5 text-center">名前</th>
-                          <th className="px-3 py-3.5 text-center">レート</th>
-                          <th className="px-3 py-3.5 text-center">勝率</th>
-                        </tr>
-                      </thead>
+                    <table className="mt-4 min-w-full table-fixed">
                       <tbody className="divide-y divide-gray-200 bg-white">
                         {getPickedUpRecentGames().map((row) => (
-                          <tr                     
+                          <tr
                             key={row.game_id}
+                            className="hover:bg-gray-50 cursor-pointer"
                             onClick={() => navigate(`/players/kishi/${row.sente_player_number}`)}
-                            className="cursor-pointer hover:bg-gray-100"
                           >
-                            <td className="px-3 py-3.5 text-left text-gray-500 text-sm">{extractDisplayGameName(row.game_name)}</td>
-                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{DateUtils.formatShortDate(row.date[0])}</td>
-                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{ResultStatusIcon(row.sente_player_result)}</td>
-                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm underline">{row.sente_player_name}</td>
-                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{row.sente_rating.toFixed(0)}</td>
-                            <td className="px-3 py-3.5 text-center text-gray-500 text-sm">{row.gote_player_name}</td>
+                            <td className="px-3 py-2 text-sm text-gray-800" colSpan={5}>
+                              {/* 上段：日付と対局名 */}
+                              <div className="text-sm font-medium text-gray-800 mb-1">
+                                {DateUtils.formatShortDate(row.date[0])}　{extractDisplayGameName(row.game_name)}
+                              </div>
+
+                              {/* 下段：1行グリッド形式で名前・勝敗・レート */}
+                              <div className="grid grid-cols-5 gap-2 text-sm text-gray-800">
+                                {/* 先手 勝敗 */}
+                                <div className="flex justify-center items-center">
+                                  {ResultStatusIcon(row.sente_player_result)}
+                                </div>
+
+                                {/* 先手 名前＋レート */}
+                                <div className="flex flex-col justify-center items-center">
+                                  <div className="underline">{row.sente_player_name}</div>
+                                  <div className="text-xs text-gray-500">
+                                    ({(row.sente_rating - row.sente_rating_delta).toFixed(1)} → {row.sente_rating.toFixed(1)})
+                                  </div>
+                                </div>
+
+                                {/* vs */}
+                                <div className="flex justify-center items-center text-gray-500">
+                                  vs
+                                </div>
+
+                                {/* 後手 名前＋レート */}
+                                <div className="flex flex-col justify-center items-center">
+                                  <div>{row.gote_player_name}</div>
+                                  <div className="text-xs text-gray-500">
+                                    ({(row.gote_rating - row.gote_rating_delta).toFixed(1)} → {row.gote_rating.toFixed(1)})
+                                  </div>
+                                </div>
+
+                                {/* 後手 勝敗 */}
+                                <div className="flex justify-center items-center">
+                                  {ResultStatusIcon(row.gote_player_result)}
+                                </div>
+                              </div>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
+
                   </div>
                 </div>
               </section>
