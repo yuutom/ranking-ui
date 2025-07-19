@@ -6,6 +6,7 @@ export enum Danni {
     DAN8 = "八段",
     DAN9 = "九段",
     NONE = "なし",
+    JORYU_DAN6 = "女流六段",
     JORYU_DAN5 = "女流五段",
     JORYU_DAN4 = "女流四段",
     JORYU_DAN3 = "女流三段",
