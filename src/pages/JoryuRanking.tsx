@@ -1,7 +1,7 @@
 'use client'
 
 import { useNavigate } from 'react-router-dom';
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogBackdrop,
@@ -26,7 +26,7 @@ import { Affiliation } from '../enum/Affiliation';
 import type { Player } from '../types/player';
 import { DateUtils } from '../utils/DateUtils';
 import { getJsonJoryu } from '../data/playersJson';
-import { latestJoryuRatings, statsMap } from '../data/ratingHistoryJson';
+import { getLatestJoryuRatings, getStatsMap } from '../data/ratingHistoryJson';
 
 const sortOptions = [
   { name: "Rate" },
@@ -86,6 +86,8 @@ export default function JoryuRanking() {
     async function fetchData() {
       setLoading(true);
       const jsonJoryu = await getJsonJoryu();
+      const latestJoryuRatings = await getLatestJoryuRatings();
+      const statsMap = await getStatsMap();
       const result = jsonJoryu.map((player) => {
         const rating = latestJoryuRatings.get(player.id);
         const stats = statsMap.get(player.id);
@@ -186,11 +188,20 @@ export default function JoryuRanking() {
                           <div className="flex h-5 shrink-0 items-center">
                             <div className="group grid size-4 grid-cols-1">
                               <input
-                                defaultValue={option.value}
+                                checked={selectedFilters[section.id]?.has(option.value) ?? false}
                                 id={`filter-mobile-${section.id}-${optionIdx}`}
                                 name={`${section.id}[]`}
                                 type="checkbox"
                                 className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                                onChange={(e) => {
+                                  const isChecked = e.target.checked;
+                                  setSelectedFilters((prev) => {
+                                    const next = new Set(prev[section.id] || []);
+                                    if (isChecked) next.add(option.value);
+                                    else next.delete(option.value);
+                                    return { ...prev, [section.id]: next };
+                                  });
+                                }}
                               />
                               <svg
                                 fill="none"
@@ -214,7 +225,10 @@ export default function JoryuRanking() {
                               </svg>
                             </div>
                           </div>
-                          <label htmlFor={`filter-mobile-${section.id}-${optionIdx}`} className="text-sm text-gray-500">
+                          <label
+                            htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
+                            className="whitespace-nowrap pr-6 text-sm font-medium text-gray-900"
+                          >
                             {option.label}
                           </label>
                         </div>
@@ -306,7 +320,7 @@ export default function JoryuRanking() {
                             <div className="group grid size-4 grid-cols-1">
                               <input
                                 checked={selectedFilters[section.id]?.has(option.value) ?? false}
-                                id={`filter-${section.id}-${optionIdx}`}
+                                id={`filter-mobile-${section.id}-${optionIdx}`}
                                 name={`${section.id}[]`}
                                 type="checkbox"
                                 className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
@@ -343,7 +357,7 @@ export default function JoryuRanking() {
                             </div>
                           </div>
                           <label
-                            htmlFor={`filter-${section.id}-${optionIdx}`}
+                            htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
                             className="whitespace-nowrap pr-6 text-sm font-medium text-gray-900"
                           >
                             {option.label}

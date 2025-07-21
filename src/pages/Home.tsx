@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getJsonJoryu, getJsonKishi } from "../data/playersJson";
-import { latestJoryuRatings, latestKishiRatings } from "../data/ratingHistoryJson";
+import { getLatestJoryuRatings, getLatestKishiRatings } from "../data/ratingHistoryJson";
 import { useNavigate } from "react-router-dom";
 import { DateUtils } from "../utils/DateUtils";
 import { getPickedUpRecentGames } from "../data/gamesJson";
@@ -11,15 +11,22 @@ import type { Player } from "../types/player";
 export default function Home() {
   const [jsonKishi, setJsonKishi] = useState<Player[] | undefined>(undefined);
   const [jsonJoryu, setJsonJoryu] = useState<Player[] | undefined>(undefined);
+  const [pickedUpGames, setPickedUpGames] = useState<any[]>([]);
+  const [kishiRatings, setKishiRatings] = useState<Map<string, any>>(new Map());
+  const [joryuRatings, setJoryuRatings] = useState<Map<string, any>>(new Map());
 
   useEffect(() => {
     getJsonKishi().then(setJsonKishi).catch(() => setJsonKishi([]));
     getJsonJoryu().then(setJsonJoryu).catch(() => setJsonJoryu([]));
+
+    getPickedUpRecentGames().then(setPickedUpGames).catch(() => setPickedUpGames([]));
+    getLatestKishiRatings().then(setKishiRatings).catch(() => setKishiRatings(new Map()));
+    getLatestJoryuRatings().then(setJoryuRatings).catch(() => setJoryuRatings(new Map()));
   }, []);
 
   const kishiWithRating =
     jsonKishi?.map((player) => {
-      const rating = latestKishiRatings.get(player.id);
+      const rating = kishiRatings.get(player.id);
       return {
         ...player,
         rating: rating?.rating ?? 0,
@@ -34,7 +41,7 @@ export default function Home() {
 
   const joryuWithRating =
     jsonJoryu?.map((player) => {
-      const rating = latestJoryuRatings.get(player.id);
+      const rating = joryuRatings.get(player.id);
       return {
         ...player,
         rating: rating?.rating ?? 0,
@@ -145,7 +152,7 @@ export default function Home() {
             </h2>
             <table className="mt-4 min-w-full table-fixed">
               <tbody className="divide-y divide-gray-200 bg-white">
-                {getPickedUpRecentGames().map((row) => (
+                {pickedUpGames.map((row) => (
                   <tr
                     key={row.game_id}
                     className="hover:bg-gray-50 cursor-pointer"

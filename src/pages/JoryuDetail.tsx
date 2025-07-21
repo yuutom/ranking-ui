@@ -3,8 +3,8 @@ import type { Player } from '../types/player'
 import { DateUtils } from '../utils/DateUtils'
 import { ResultStatusIcon } from '../componets/ResultStatusIcon'
 import { getJsonJoryu } from '../data/playersJson'
-import React, { useState, useEffect } from 'react'
-import { getFilterdRecord, getRanking, jsonRatingHistory, latestJoryuRatings, sortedByStreak, sortedByTotal, sortedByWinRate, sortedByWins, statsMap } from '../data/ratingHistoryJson'
+import { useState, useEffect } from 'react'
+import { getFilterdRecord, getRanking, getLatestJoryuRatings, getSortedByStreak, getSortedByTotal, getSortedByWinRate, getSortedByWins, getStatsMap } from '../data/ratingHistoryJson'
 import { extractDisplayGameName } from '../enum/GameCategory'
 import { Title } from '../enum/Title'
 import { RatingChart } from '../componets/RatingChart'
@@ -20,11 +20,21 @@ export default function JoryuDetail() {
   const [player, setPlayer] = useState<Player | undefined>(undefined);
   const [playersWithRating, setPlayersWithRating] = useState<(Player & { rating: number })[]>([]);
   const [loading, setLoading] = useState(true);
+  const [myStats, setMyStats] = useState<{ wins: number; total: number; winRate: number; maxStreak: number } | undefined>(undefined);
+  const [records, setRecords] = useState<any[]>([]);
+  const [maxRecord, setMaxRecord] = useState<any>(null);
+  const [playerRanking, setPlayerRanking] = useState<number>(0);
+  const [playerRating, setPlayerRating] = useState<number | undefined>(undefined);
+  const [winRateRanking, setWinRateRanking] = useState<number | undefined>(undefined);
+  const [totalRanking, setTotalRanking] = useState<number | undefined>(undefined);
+  const [winsRanking, setWinsRanking] = useState<number | undefined>(undefined);
+  const [streakRanking, setStreakRanking] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
       const jsonJoryu = await getJsonJoryu();
+      const latestJoryuRatings = await getLatestJoryuRatings();
       setPlayer(jsonJoryu.find((k) => String(k.kishiNumber) === kishiNumber));
       setPlayersWithRating(
         jsonJoryu.map((player) => {
@@ -39,6 +49,52 @@ export default function JoryuDetail() {
     }
     fetchData();
   }, [kishiNumber]);
+
+  useEffect(() => {
+    async function fetchStats() {
+      if (!player) return;
+      const statsMap = await getStatsMap();
+      setMyStats(statsMap.get(player.id));
+      const filteredRecords = await getFilterdRecord(player.id);
+      setRecords(filteredRecords);
+      if (filteredRecords.length > 0) {
+        setMaxRecord(filteredRecords.reduce(
+          (max, current) => (current.rating > max.rating ? current : max),
+          filteredRecords[0]
+        ));
+      }
+    }
+    fetchStats();
+  }, [player]);
+
+  useEffect(() => {
+    async function fetchRatings() {
+      if (!player) return;
+      const latestJoryuRatings = await getLatestJoryuRatings();
+      const sorted = Array.from(latestJoryuRatings.entries())
+        .sort((a, b) => b[1].rating - a[1].rating)
+        .map(([id]) => id);
+      setPlayerRanking(sorted.indexOf(player.id) + 1);
+      setPlayerRating(latestJoryuRatings.get(player.id)?.rating);
+    }
+    fetchRatings();
+  }, [player]);
+
+  useEffect(() => {
+    async function fetchRankings() {
+      if (!player) return;
+      const sortedByWinRate = await getSortedByWinRate();
+      const sortedByTotal = await getSortedByTotal();
+      const sortedByWins = await getSortedByWins();
+      const sortedByStreak = await getSortedByStreak();
+      setWinRateRanking(await getRanking(sortedByWinRate, player.id));
+      setTotalRanking(await getRanking(sortedByTotal, player.id));
+      setWinsRanking(await getRanking(sortedByWins, player.id));
+      setStreakRanking(await getRanking(sortedByStreak, player.id));
+    }
+    fetchRankings();
+  }, [player]);
+
 
   if (loading) {
     return <div className="p-8 text-gray-500">女流棋士データを読み込み中...</div>;
@@ -66,25 +122,6 @@ export default function JoryuDetail() {
     }
     return player?.danni ?? "";
   })();
-
-  const sortedRatings = Array.from(latestJoryuRatings.entries())
-    .sort((a, b) => b[1].rating - a[1].rating)
-    .map(([id]) => id); // id順に並んだ配列
-
-  const playerRanking = sortedRatings.indexOf(player.id) + 1;
-  const playerRating = latestJoryuRatings.get(player.id)?.rating;
-
-  const myStats = statsMap.get(player.id);
-  const winRateRanking = getRanking(sortedByWinRate, player.id);
-  const winsRanking = getRanking(sortedByWins, player.id);
-  const totalRanking = getRanking(sortedByTotal, player.id);
-  const streakRanking = getRanking(sortedByStreak, player.id);
-
-  const records = getFilterdRecord(player.id);
-  const maxRecord = records.reduce(
-    (max, current) => (current.rating > max.rating ? current : max),
-    records[0]
-  );
 
   const sortedRatingsWithWinRate = playersWithRating
     .sort((a, b) => b.rating - a.rating)
@@ -189,7 +226,7 @@ export default function JoryuDetail() {
                 <h2 className="absolute top-3 left-4 text-sm font-bold text-gray-900">順位</h2>
                 <div className="h-full flex items-center justify-center">
                   <div className="text-3xl text-gray-500">
-                    {playerRating ? `${playerRanking} 位` : "—"}
+                    {playerRanking} 位
                   </div>
                 </div>
               </div>
@@ -389,7 +426,7 @@ export default function JoryuDetail() {
                   )}
                 </div>
                 <div className="mt-8">
-                <RatingChart ratingHistory={jsonRatingHistory} playerId={player.id} />
+                <RatingChart ratingHistory={records} playerId={player.id} />
                 </div>
               </div>
             </section>

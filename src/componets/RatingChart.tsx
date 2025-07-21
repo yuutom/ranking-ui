@@ -1,4 +1,4 @@
-// components/RatingChart.tsx
+import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import type { RatingRecord } from '../types/RatingRecord';
 import { DateUtils } from '../utils/DateUtils';
@@ -10,12 +10,23 @@ type Props = {
 };
 
 export const RatingChart = ({ playerId }: Props) => {
-  const data = getFilterdRecord(playerId)
-  .map(r => ({
-    date: DateUtils.formatJapaneseDate(r.date),
-    rating: r.rating,
-  }));
+  const [data, setData] = useState<{ date: string; rating: number }[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const records: RatingRecord[] = await getFilterdRecord(playerId);
+      const formattedData = records.map((r: RatingRecord) => ({
+        date: DateUtils.formatJapaneseDate(r.date),
+        rating: r.rating,
+      }));
+      setData(formattedData);
+      setLoading(false);
+    };
+    fetchData();
+  }, [playerId]);
+
+  if (loading) return <p>読み込み中...</p>;
   if (data.length === 0) return <p>レーティングデータがありません。</p>;
 
   return (
