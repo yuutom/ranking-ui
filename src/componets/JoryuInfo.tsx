@@ -36,7 +36,7 @@ export default function JoryuInfo({kishi}: JoryuInfoProps) {
                   {displayTitle}
               </span>
               <div className="flex items-center space-x-3">
-                <h3 className="truncate text-sm font-medium text-gray-900">{kishi.nameKana}</h3>
+                <h3 className="truncate text-sm font-semibold text-gray-900">{kishi.nameKana}</h3>
               </div>
               <p className="mt-1 truncate text-sm text-gray-500">{kishi.nameRome}</p>
             </div>

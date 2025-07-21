@@ -31,7 +31,7 @@ export default function JoryuList() {
     <main className="max-w-screen-md mx-auto">
       {jsonJoryu.filter((player) => player.title.length > 0).length > 0 && (
         <>
-          <div className="relative">
+          <div className="relative mb-20">
             <div aria-hidden="true" className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300" />
             </div>
@@ -61,7 +61,7 @@ export default function JoryuList() {
 
         return (
           <div key={danni}>
-            <div className="relative mt-4">
+            <div className="relative my-20">
               <div aria-hidden="true" className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300" />
               </div>
