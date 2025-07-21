@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import KishiInfo from '../componets/KishiInfo'
 import { getJsonJoryu } from '../data/playersJson'
 import { Danni } from '../enum/Danni'
 import type { Player } from '../types/player'
+import JoryuInfo from '../componets/JoryuInfo'
 
 export default function JoryuList() {
   const [jsonJoryu, setJsonJoryu] = useState<Player[] | undefined>(undefined)
@@ -45,7 +45,7 @@ export default function JoryuList() {
               {jsonJoryu
                 .filter((player) => player.title.length > 0)
                 .map((player) => (
-                  <KishiInfo key={player.id} kishi={player} />
+                  <JoryuInfo key={player.id} kishi={player} />
                 ))}
             </ul>
           </div>
@@ -73,7 +73,7 @@ export default function JoryuList() {
             <div className="mt-4">
               <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {players.map((player) => (
-                  <KishiInfo key={player.id} kishi={player} />
+                  <JoryuInfo key={player.id} kishi={player} />
                 ))}
               </ul>
             </div>
