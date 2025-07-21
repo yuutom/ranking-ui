@@ -1,7 +1,7 @@
 'use client'
 
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogBackdrop,
@@ -25,7 +25,7 @@ import { JunisenClass } from '../enum/JunisenClass';
 import { Affiliation } from '../enum/Affiliation';
 import type { Player } from '../types/player';
 import { DateUtils } from '../utils/DateUtils';
-import { jsonJoryu } from '../data/playersJson';
+import { getJsonJoryu } from '../data/playersJson';
 import { latestJoryuRatings, statsMap } from '../data/ratingHistoryJson';
 
 const sortOptions = [
@@ -65,51 +65,76 @@ const filters = [
   },
 ]
 
-const playersWithRating = jsonJoryu.map((player) => {
-  const rating = latestJoryuRatings.get(player.id);
-  const stats = statsMap.get(player.id);
-
-  return {
-    ...player,
-    rating: rating?.rating ?? 0,
-    stats: stats,
-    wins: stats?.wins ?? -1,
-    total: stats?.total ?? -1,
-    winRate: stats?.winRate ?? -1,
-    maxStreak: stats?.maxStreak ?? -1,
-  };
-});
+type PlayerWithRating = Player & {
+  rating: number;
+  stats: any;
+  wins: number;
+  total: number;
+  winRate: number;
+  maxStreak: number;
+};
 
 export default function JoryuRanking() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: Set<string> }>({});
   const [sortKey, setSortKey] = useState<string>("Rate");
-  const filteredData = playersWithRating
-  .filter((kishi) => {
-    return Object.entries(selectedFilters).every(([key, set]) => {
-      if (set.size === 0) return true;
-      const k = key as keyof Player;
-      return set.has(String(kishi[k]));
-    });
-  })
-  .sort((a, b) => {
-    const getWinRate = (k: typeof a) =>
-      k.stats && k.stats.total > 0
-        ? k.stats.wins / k.stats.total
-        : 0;
+  const [playersWithRating, setPlayersWithRating] = useState<PlayerWithRating[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    if (sortKey === '勝率') {
-      return getWinRate(b) - getWinRate(a);
-    } else if (sortKey === '勝数') {
-      return (b.wins || 0) - (a.wins || 0);
-    } else if (sortKey === '対局数') {
-      return (b.total || 0) - (a.total || 0);
-    } else if (sortKey === 'Rate') {
-    return (b.rating || 0) - (a.rating || 0);
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      const jsonJoryu = await getJsonJoryu();
+      const result = jsonJoryu.map((player) => {
+        const rating = latestJoryuRatings.get(player.id);
+        const stats = statsMap.get(player.id);
+
+        return {
+          ...player,
+          rating: rating?.rating ?? 0,
+          stats: stats,
+          wins: stats?.wins ?? -1,
+          total: stats?.total ?? -1,
+          winRate: stats?.winRate ?? -1,
+          maxStreak: stats?.maxStreak ?? -1,
+        };
+      });
+      setPlayersWithRating(result);
+      setLoading(false);
     }
-    return 0;
-});
+    fetchData();
+  }, []);
+
+  const filteredData = playersWithRating
+    .filter((kishi) => {
+      return Object.entries(selectedFilters).every(([key, set]) => {
+        if (set.size === 0) return true;
+        const k = key as keyof Player;
+        return set.has(String(kishi[k]));
+      });
+    })
+    .sort((a, b) => {
+      const getWinRate = (k: typeof a) =>
+        k.stats && k.stats.total > 0
+          ? k.stats.wins / k.stats.total
+          : 0;
+
+      if (sortKey === '勝率') {
+        return getWinRate(b) - getWinRate(a);
+      } else if (sortKey === '勝数') {
+        return (b.wins || 0) - (a.wins || 0);
+      } else if (sortKey === '対局数') {
+        return (b.total || 0) - (a.total || 0);
+      } else if (sortKey === 'Rate') {
+        return (b.rating || 0) - (a.rating || 0);
+      }
+      return 0;
+    });
+
+  if (loading) {
+    return <div className="text-center py-10">女流棋士データを読み込み中...</div>;
+  }
 
   return (
     <div className="max-w-screen-md mx-auto">
@@ -286,14 +311,14 @@ export default function JoryuRanking() {
                                 type="checkbox"
                                 className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                 onChange={(e) => {
-                                    const isChecked = e.target.checked;
-                                    setSelectedFilters((prev) => {
-                                      const next = new Set(prev[section.id] || []);
-                                      if (isChecked) next.add(option.value);
-                                      else next.delete(option.value);
-                                      return { ...prev, [section.id]: next };
-                                    });
-                                  }}
+                                  const isChecked = e.target.checked;
+                                  setSelectedFilters((prev) => {
+                                    const next = new Set(prev[section.id] || []);
+                                    if (isChecked) next.add(option.value);
+                                    else next.delete(option.value);
+                                    return { ...prev, [section.id]: next };
+                                  });
+                                }}
                               />
                               <svg
                                 fill="none"
@@ -334,7 +359,7 @@ export default function JoryuRanking() {
         </section>
       </div>
     </div>
-
+    
     <div className="mt-2 flow-root">
       <div className="inline-block min-w-full py-2 align-middle overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-300">

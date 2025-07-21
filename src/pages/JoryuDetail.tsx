@@ -2,7 +2,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type { Player } from '../types/player'
 import { DateUtils } from '../utils/DateUtils'
 import { ResultStatusIcon } from '../componets/ResultStatusIcon'
-import { jsonJoryu } from '../data/playersJson'
+import { getJsonJoryu } from '../data/playersJson'
+import React, { useState, useEffect } from 'react'
 import { getFilterdRecord, getRanking, jsonRatingHistory, latestJoryuRatings, sortedByStreak, sortedByTotal, sortedByWinRate, sortedByWins, statsMap } from '../data/ratingHistoryJson'
 import { extractDisplayGameName } from '../enum/GameCategory'
 import { Title } from '../enum/Title'
@@ -15,27 +16,43 @@ export function calculateExpectedWinRate(selfRating: number, opponentRating: num
 
 export default function JoryuDetail() {
   const navigate = useNavigate();
-  const { kishiNumber } = useParams<{ kishiNumber: string }>()
-  const player: Player | undefined = jsonJoryu.find(
-    (k) => String(k.kishiNumber) === kishiNumber
-  )
-  if (!player) {
-    return <div className="p-8 text-gray-500">棋士が見つかりません</div>
+  const { kishiNumber } = useParams<{ kishiNumber: string }>();
+  const [player, setPlayer] = useState<Player | undefined>(undefined);
+  const [playersWithRating, setPlayersWithRating] = useState<(Player & { rating: number })[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      const jsonJoryu = await getJsonJoryu();
+      setPlayer(jsonJoryu.find((k) => String(k.kishiNumber) === kishiNumber));
+      setPlayersWithRating(
+        jsonJoryu.map((player) => {
+          const rating = latestJoryuRatings.get(player.id);
+          return {
+            ...player,
+            rating: rating?.rating ?? 0,
+          };
+        })
+      );
+      setLoading(false);
+    }
+    fetchData();
+  }, [kishiNumber]);
+
+  if (loading) {
+    return <div className="p-8 text-gray-500">女流棋士データを読み込み中...</div>;
   }
 
-  const playersWithRating = jsonJoryu.map((player) => {
-    const rating = latestJoryuRatings.get(player.id);
-    return {
-      ...player,
-      rating: rating?.rating ?? 0,
-    };
-  })
+  if (!player) {
+    return <div className="p-8 text-gray-500">棋士が見つかりません</div>;
+  }
 
   const displayTitle: string = (() => {
     if (Array.isArray(player?.title) && player.title.length > 0) {
       const hasRyuoh = player.title.includes(Title.RYUOH);
       const hasMeijin = player.title.includes(Title.MEIJIN);
-  
+
       if (hasRyuoh && hasMeijin) {
         return "竜王・名人";
       }
@@ -51,8 +68,8 @@ export default function JoryuDetail() {
   })();
 
   const sortedRatings = Array.from(latestJoryuRatings.entries())
-  .sort((a, b) => b[1].rating - a[1].rating)
-  .map(([id]) => id); // id順に並んだ配列
+    .sort((a, b) => b[1].rating - a[1].rating)
+    .map(([id]) => id); // id順に並んだ配列
 
   const playerRanking = sortedRatings.indexOf(player.id) + 1;
   const playerRating = latestJoryuRatings.get(player.id)?.rating;
@@ -64,15 +81,45 @@ export default function JoryuDetail() {
   const streakRanking = getRanking(sortedByStreak, player.id);
 
   const records = getFilterdRecord(player.id);
-  const maxRecord = records.reduce((max, current) =>
-    current.rating > max.rating ? current : max,
+  const maxRecord = records.reduce(
+    (max, current) => (current.rating > max.rating ? current : max),
     records[0]
-);
+  );
 
-const sortedRatingsWithWinRate = playersWithRating
-  .sort((a, b) => b.rating - a.rating)
-  .map((r, index) => {
-    if (playerRating === undefined || r.rating === undefined || playerRating == 0 || r.rating == 0) {
+  const sortedRatingsWithWinRate = playersWithRating
+    .sort((a, b) => b.rating - a.rating)
+    .map((r, index) => {
+      if (
+        playerRating === undefined ||
+        r.rating === undefined ||
+        playerRating == 0 ||
+        r.rating == 0
+      ) {
+        return {
+          rank: index + 1,
+          name: r.nameKana,
+          id: r.id,
+          category: r.playerCategory,
+          number: r.kishiNumber,
+          rating: r.rating,
+          expectedWinRate: "-",
+        };
+      }
+
+      if (player.id === r.id) {
+        return {
+          rank: index + 1,
+          name: r.nameKana,
+          id: r.id,
+          category: r.playerCategory,
+          number: r.kishiNumber,
+          rating: r.rating,
+          expectedWinRate: "-",
+        };
+      }
+
+      const winRate = calculateExpectedWinRate(playerRating, r.rating);
+
       return {
         rank: index + 1,
         name: r.nameKana,
@@ -80,34 +127,9 @@ const sortedRatingsWithWinRate = playersWithRating
         category: r.playerCategory,
         number: r.kishiNumber,
         rating: r.rating,
-        expectedWinRate: "-",
+        expectedWinRate: winRate,
       };
-    }
-
-    if (player.id === r.id) {
-      return {
-        rank: index + 1,
-        name: r.nameKana,
-        id: r.id,
-        category: r.playerCategory,
-        number: r.kishiNumber,
-        rating: r.rating,
-        expectedWinRate: "-",
-      };
-    }
-
-    const winRate = calculateExpectedWinRate(playerRating, r.rating);
-
-    return {
-      rank: index + 1,
-      name: r.nameKana,
-      id: r.id,
-      category: r.playerCategory,
-      number: r.kishiNumber,
-      rating: r.rating,
-      expectedWinRate: winRate,
-    };
-  });
+    });
 
   return (
     <>

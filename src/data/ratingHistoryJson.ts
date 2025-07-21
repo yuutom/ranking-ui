@@ -1,7 +1,6 @@
 import { PlayerCategory } from '../enum/PlayerCategory'
 import { ResultStatus } from '../enum/ResultStatus';
 import type { RatingRecord } from '../types/RatingRecord'
-import { jsonJoryu, jsonKishi } from './playersJson';
 import rawRatingHistory from './rating_history.json'
 
 // プレイヤーごとの全ての対局結果のリスト
@@ -41,9 +40,9 @@ export function getFilterdRecord(playerId: string): RatingRecord[] {
 // player_id: 最新の対局時のRatingRecord
 export const latestKishiRatings = (() => {
   const map = new Map<string, RatingRecord>();
-  const kishiRatingHistory = jsonRatingHistory
-  .filter((record) => record.player_category === PlayerCategory.KISHI)
-  .filter((record) => jsonKishi.map((p) => p.id).includes(record.player_id))
+  // jsonKishiは非同期関数なのでここでは使えない。代わりにplayer_categoryで絞るのみ
+  // 元々次のフィルタも実装していたがS3対応で削除 .filter((record) => jsonKishi.map((p) => p.id).includes(record.player_id))
+  const kishiRatingHistory = jsonRatingHistory.filter((record) => record.player_category === PlayerCategory.KISHI);
 
   for (const r of kishiRatingHistory as RatingRecord[]) {
     const existing = map.get(r.player_id);
@@ -56,9 +55,9 @@ export const latestKishiRatings = (() => {
 
 export const latestJoryuRatings = (() => {
   const map = new Map<string, RatingRecord>();
-  const joryuRatingHistory = jsonRatingHistory
-  .filter((record) => record.player_category === PlayerCategory.JORYU)
-  .filter((record) => jsonJoryu.map((p) => p.id).includes(record.player_id))
+  // jsonJoryuは非同期関数なのでここでは使えない。代わりにplayer_categoryで絞るのみ
+  // 元々次のフィルタも実装していたがS3対応で削除 .filter((record) => jsonJoryu.map((p) => p.id).includes(record.player_id))
+  const joryuRatingHistory = jsonRatingHistory.filter((record) => record.player_category === PlayerCategory.JORYU);
 
   for (const r of joryuRatingHistory as RatingRecord[]) {
     const existing = map.get(r.player_id);
