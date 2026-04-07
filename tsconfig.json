@@ -6,4 +6,8 @@
   ],
   "resolveJsonModule": true,
   "esModuleInterop": true,
+  "compilerOptions": {
+    "verbatimModuleSyntax": false,
+    "module": "ESNext"
+  }
 }

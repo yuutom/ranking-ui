@@ -44,6 +44,10 @@ const filters = [
       { value: RyuohsenClass.RYUOH, label: RyuohsenClass.RYUOH },
       { value: RyuohsenClass.CLASS_1, label: RyuohsenClass.CLASS_1 },
       { value: RyuohsenClass.CLASS_2, label: RyuohsenClass.CLASS_2 },
+      { value: RyuohsenClass.CLASS_3, label: RyuohsenClass.CLASS_3 },
+      { value: RyuohsenClass.CLASS_4, label: RyuohsenClass.CLASS_4 },
+      { value: RyuohsenClass.CLASS_5, label: RyuohsenClass.CLASS_5 },
+      { value: RyuohsenClass.CLASS_6, label: RyuohsenClass.CLASS_6 },
     ],
   },
   {
@@ -53,6 +57,10 @@ const filters = [
       { value: JunisenClass.MEIJIN, label: JunisenClass.MEIJIN },
       { value: JunisenClass.A, label: JunisenClass.A },
       { value: JunisenClass.B1, label: JunisenClass.B1 },
+      { value: JunisenClass.B2, label: JunisenClass.B2 },
+      { value: JunisenClass.C1, label: JunisenClass.C1 },
+      { value: JunisenClass.C2, label: JunisenClass.C2 },
+      { value: JunisenClass.FREE, label: JunisenClass.FREE },
     ],
   },
   {
@@ -82,6 +90,12 @@ export default function KishiRanking() {
   const [playersWithRating, setPlayersWithRating] = useState<PlayerWithRating[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // New state for age and debut age filters using numbers for slider
+  const [minAge, setMinAge] = useState<number>(0);
+  const [maxAge, setMaxAge] = useState<number>(100);
+  const [minDebutAge, setMinDebutAge] = useState<number>(0);
+  const [maxDebutAge, setMaxDebutAge] = useState<number>(100);
+
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
@@ -110,11 +124,28 @@ export default function KishiRanking() {
 
   const filteredData = playersWithRating
     .filter((kishi) => {
-      return Object.entries(selectedFilters).every(([key, set]) => {
+      // Filter by selected checkbox filters
+      const checkboxFilterPass = Object.entries(selectedFilters).every(([key, set]) => {
         if (set.size === 0) return true;
         const k = key as keyof Player;
         return set.has(String(kishi[k]));
       });
+
+      if (!checkboxFilterPass) return false;
+
+      // Filter by age range
+      const age = DateUtils.getCurrentAge(kishi.birthDate);
+      if (age === null) return false;
+      if (age < minAge) return false;
+      if (age > maxAge) return false;
+
+      // Filter by debut age range
+      const debutAge = DateUtils.getDebutAge(kishi.birthDate, kishi.debutDate);
+      if (debutAge === null) return false;
+      if (debutAge < minDebutAge) return false;
+      if (debutAge > maxDebutAge) return false;
+
+      return true;
     })
     .sort((a, b) => {
       const getWinRate = (k: typeof a) =>
@@ -187,22 +218,22 @@ export default function KishiRanking() {
                         <div key={option.value} className="flex gap-3">
                           <div className="flex h-5 shrink-0 items-center">
                             <div className="group grid size-4 grid-cols-1">
-                              <input
-                                checked={selectedFilters[section.id]?.has(option.value) ?? false}
-                                id={`filter-${section.id}-${optionIdx}`}
-                                name={`${section.id}[]`}
-                                type="checkbox"
-                                className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
-                                onChange={(e) => {
-                                  const isChecked = e.target.checked;
-                                  setSelectedFilters((prev) => {
-                                    const next = new Set(prev[section.id] || []);
-                                    if (isChecked) next.add(option.value);
-                                    else next.delete(option.value);
-                                    return { ...prev, [section.id]: next };
-                                  });
-                                }}
-                              />
+                        <input
+                          type="number"
+                          id="minAge"
+                          value={minAge}
+                          onChange={(e) => setMinAge(Number(e.target.value))}
+                          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          min={0}
+                        />
+                        <input
+                          type="number"
+                          id="maxAge"
+                          value={maxAge}
+                          onChange={(e) => setMaxAge(Number(e.target.value))}
+                          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          min={0}
+                        />
                               <svg
                                 fill="none"
                                 viewBox="0 0 14 14"
@@ -237,6 +268,95 @@ export default function KishiRanking() {
                   </DisclosurePanel>
                 </Disclosure>
               ))}
+
+              {/* Age and Debut Age Filters */}
+              <Disclosure as="div" className="border-t border-gray-200 px-4 py-6">
+                <h3 className="-mx-2 -my-3 flow-root">
+                  <DisclosureButton className="group flex w-full items-center justify-between bg-white px-2 py-3 text-sm text-gray-400">
+                    <span className="font-medium text-gray-900">年齢フィルター</span>
+                    <span className="ml-6 flex items-center">
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className="size-5 rotate-0 transform group-data-[open]:-rotate-180"
+                      />
+                    </span>
+                  </DisclosureButton>
+                </h3>
+                <DisclosurePanel className="pt-6">
+                  <div className="flex gap-4">
+                    <div>
+                      <label htmlFor="minAge" className="block text-sm font-medium text-gray-700">
+                        最小年齢
+                      </label>
+                      <input
+                        type="number"
+                        id="minAge"
+                        value={minAge}
+                        onChange={(e) => setMinAge(Number(e.target.value))}
+                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        min={0}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="maxAge" className="block text-sm font-medium text-gray-700">
+                        最大年齢
+                      </label>
+                      <input
+                        type="number"
+                        id="maxAge"
+                        value={maxAge}
+                        onChange={(e) => setMaxAge(Number(e.target.value))}
+                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        min={0}
+                      />
+                    </div>
+                  </div>
+                </DisclosurePanel>
+              </Disclosure>
+
+              <Disclosure as="div" className="border-t border-gray-200 px-4 py-6">
+                <h3 className="-mx-2 -my-3 flow-root">
+                  <DisclosureButton className="group flex w-full items-center justify-between bg-white px-2 py-3 text-sm text-gray-400">
+                    <span className="font-medium text-gray-900">デビュー年齢フィルター</span>
+                    <span className="ml-6 flex items-center">
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className="size-5 rotate-0 transform group-data-[open]:-rotate-180"
+                      />
+                    </span>
+                  </DisclosureButton>
+                </h3>
+                <DisclosurePanel className="pt-6">
+                  <div className="flex gap-4">
+                    <div>
+                      <label htmlFor="minDebutAge" className="block text-sm font-medium text-gray-700">
+                        最小デビュー年齢
+                      </label>
+                      <input
+                        type="number"
+                        id="minDebutAge"
+                        value={minDebutAge}
+                        onChange={(e) => setMinDebutAge(Number(e.target.value))}
+                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        min={0}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="maxDebutAge" className="block text-sm font-medium text-gray-700">
+                        最大デビュー年齢
+                      </label>
+                      <input
+                        type="number"
+                        id="maxDebutAge"
+                        value={maxDebutAge}
+                        onChange={(e) => setMaxDebutAge(Number(e.target.value))}
+                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        min={0}
+                      />
+                    </div>
+                  </div>
+                </DisclosurePanel>
+              </Disclosure>
             </form>
           </DialogPanel>
         </div>
@@ -288,6 +408,137 @@ export default function KishiRanking() {
             </button>
 
             <PopoverGroup className="hidden sm:flex sm:items-baseline sm:space-x-8">
+              {/* Insert Age and Debut Age filters before 所属 */}
+              <Popover
+                key="age"
+                id="desktop-menu-age"
+                className="relative inline-block text-left"
+              >
+                {({ open }) => (
+                  <>
+                    <div>
+                      <PopoverButton className="group inline-flex items-center justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
+                        <span>年齢</span>
+                        <ChevronDownIcon
+                          aria-hidden="true"
+                          className="-mr-1 ml-1 size-5 shrink-0 text-gray-400 group-hover:text-gray-500"
+                        />
+                      </PopoverButton>
+                    </div>
+                    {open && (
+                      <PopoverPanel
+                        static
+                        className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white p-4 shadow-2xl ring-1 ring-black/5 transition focus:outline-none"
+                      >
+                        <form className="space-y-4 w-48">
+                          <label className="block text-sm font-medium text-gray-700">年齢範囲</label>
+                      <div className="relative w-full">
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={minAge}
+                          onChange={(e) => {
+                            const val = Math.min(Number(e.target.value), maxAge - 1);
+                            setMinAge(val);
+                          }}
+                          className="absolute appearance-none h-2 w-full rounded-lg bg-gray-200"
+                          style={{ zIndex: 3 }}
+                          step={1}
+                          aria-label="最小年齢"
+                        />
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={maxAge}
+                          onChange={(e) => {
+                            const val = Math.max(Number(e.target.value), minAge + 1);
+                            setMaxAge(val);
+                          }}
+                          className="absolute appearance-none h-2 w-full rounded-lg bg-gray-200"
+                          style={{ zIndex: 4 }}
+                          step={1}
+                          aria-label="最大年齢"
+                        />
+                        <div className="relative h-2 rounded-lg bg-indigo-600" style={{ marginLeft: `${(minAge / 100) * 100}%`, marginRight: `${100 - (maxAge / 100) * 100}%` }} />
+                        <div className="flex justify-between text-xs text-gray-500 mt-2">
+                          <span>{minAge}歳</span>
+                          <span>{maxAge}歳</span>
+                        </div>
+                      </div>
+                        </form>
+                      </PopoverPanel>
+                    )}
+                  </>
+                )}
+              </Popover>
+
+              <Popover
+                key="debutAge"
+                id="desktop-menu-debutAge"
+                className="relative inline-block text-left"
+              >
+                {({ open }) => (
+                  <>
+                    <div>
+                      <PopoverButton className="group inline-flex items-center justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
+                        <span>デビュー年齢</span>
+                        <ChevronDownIcon
+                          aria-hidden="true"
+                          className="-mr-1 ml-1 size-5 shrink-0 text-gray-400 group-hover:text-gray-500"
+                        />
+                      </PopoverButton>
+                    </div>
+                    {open && (
+                      <PopoverPanel
+                        static
+                        className="absolute right-0 z-10 mt-2 origin-top-right rounded-md bg-white p-4 shadow-2xl ring-1 ring-black/5 transition focus:outline-none"
+                      >
+                        <form className="space-y-4 w-48">
+                          <label className="block text-sm font-medium text-gray-700">デビュー年齢範囲</label>
+                      <div className="relative w-full">
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={minDebutAge}
+                          onChange={(e) => {
+                            const val = Math.min(Number(e.target.value), maxDebutAge - 1);
+                            setMinDebutAge(val);
+                          }}
+                          className="absolute appearance-none h-2 w-full rounded-lg bg-gray-200"
+                          style={{ zIndex: 3 }}
+                          step={1}
+                          aria-label="最小デビュー年齢"
+                        />
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={maxDebutAge}
+                          onChange={(e) => {
+                            const val = Math.max(Number(e.target.value), minDebutAge + 1);
+                            setMaxDebutAge(val);
+                          }}
+                          className="absolute appearance-none h-2 w-full rounded-lg bg-gray-200"
+                          style={{ zIndex: 4 }}
+                          step={1}
+                          aria-label="最大デビュー年齢"
+                        />
+                        <div className="relative h-2 rounded-lg bg-indigo-600" style={{ marginLeft: `${(minDebutAge / 100) * 100}%`, marginRight: `${100 - (maxDebutAge / 100) * 100}%` }} />
+                        <div className="flex justify-between text-xs text-gray-500 mt-2">
+                          <span>{minDebutAge}歳</span>
+                          <span>{maxDebutAge}歳</span>
+                        </div>
+                      </div>
+                        </form>
+                      </PopoverPanel>
+                    )}
+                  </>
+                )}
+              </Popover>
+
               {filters.map((section, sectionIdx) => (
                 <Popover
                   key={section.name}
