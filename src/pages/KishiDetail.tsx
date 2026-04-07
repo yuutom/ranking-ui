@@ -402,7 +402,7 @@ export default function KishiDetail() {
                             </div>
                             <div className="text-xs text-gray-500 flex flex-wrap gap-1">
                               <span>vs.</span>
-                              <a href={`/players/${getSlug(result.opponent_category)}}/${result.opponent_number}`} className="underline">
+                              <a href={`/players/${getSlug(result.opponent_category)}/${result.opponent_number}`} className="underline">
                                 {result.opponent_name}
                               </a>
                               <span>({result.opponent_rating.toFixed(0)})</span>
